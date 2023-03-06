@@ -1,0 +1,12 @@
+Package: sumo
+Title: Pubmed extractor based on OMOP vocabulary
+Version: 0.0.1
+Authors@R: c(
+    person("Martin", "Lavallee", , "martin.lavallee@odysseusinc.com", role = c("aut", "cre")),
+    person("Laurence", "Lawrence-Archer", , "laurence.lawrence@odysseusinc.com ", role = c("aut"))
+  )
+Description: R package helps search through pubmed based on terms linked to the OMOP vocabulary.
+License: Apache License (>= 2)
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.2.3
