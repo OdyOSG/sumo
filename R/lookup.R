@@ -7,7 +7,9 @@ searchPubmed <- function(searchStrategy) {
   #seach pubmed and get pmids
   hits <- rentrez::entrez_search(
     db = "pubmed",
-    term = searchStrategy
+    term = searchStrategy,
+    use_history = TRUE,
+    retmax = 10000
   )
   return(hits)
 
@@ -21,20 +23,24 @@ fetchPubmed <- function(hits) {
   # fetch the pmids and return xml
   res <- rentrez::entrez_fetch(
     db = "pubmed",
-    id = hits$ids,
+    web_history = hits$web_history,
     rettype = "xml"
   ) %>%
     rentrez::parse_pubmed_xml()
-
-  #TODO deal with abstract that has four sections: purpose, methods, results, conclusion
 
   tbl <- tibble::tibble(
     pmid = purrr::map_chr(res, ~.x$pmid),
     title = purrr::map_chr(res, ~.x$title),
     journal = purrr::map_chr(res, ~.x$journal),
     year = purrr::map_chr(res, ~.x$year),
-    doi = purrr::map_chr(res, ~.x$doi)
-  )
+    doi = purrr::map_chr(res, ~.x$doi),
+    abstract = purrr::map(res, ~.x$abstract),
+    key_words = purrr::map(res, ~.x$key_words)
+  ) %>%
+    group_by(pmid,title,journal,year,doi,key_words) %>%
+    summarise(abstract = paste(unlist(abstract), collapse = " ")) %>%
+    group_by(pmid,title,journal,year,doi,abstract) %>%
+    summarise(key_words = paste(unlist(key_words),collapse = "; "))
 
   return(tbl)
 }
