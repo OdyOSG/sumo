@@ -17,6 +17,9 @@ tst <- searchPubmed(searchStrategy)
 
 res <- fetchPubmed(tst)
 
+#Search Strategy
+
+
 
 
 
