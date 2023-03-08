@@ -4,7 +4,7 @@
 \alias{meshSearch}
 \title{Function to build a search query based on mesh terms}
 \usage{
-meshSearch(mesh)
+meshSearch(mesh, explosion = TRUE)
 }
 \arguments{
 \item{mesh}{a character vector of mesh terms to use in the search}

@@ -1,12 +1,13 @@
 # Internal ----------------
-subSearch <- function(tag = c("journal", "mesh", "tiab", "keyword", "text"), items) {
+subSearch <- function(tag = c("journal", "mesh", "mesh_noexp", "tiab", "keyword", "text"), items) {
   tag <- checkmate::assertChoice(
     tag,
-    choices = c("journal", "mesh", "tiab", "keyword", "text")
+    choices = c("journal", "mesh", "mesh_noexp", "tiab", "keyword", "text")
   )
   searchTag <- switch(tag,
                       journal = "ta",
-                      mesh = "mh",
+                      mesh = "MeSH",
+                      mesh_noexp = "MeSH:noexp",
                       tiab = "tiab",
                       keyword = "ot",
                       text = "tw"
@@ -28,8 +29,12 @@ journalSearch <- function(journals) {
 #' Function to build a search query based on mesh terms
 #' @param mesh a character vector of mesh terms to use in the search
 #' @export
-meshSearch <- function(mesh) {
-  subSearch(tag = "mesh", items = mesh)
+meshSearch <- function(mesh, explosion = TRUE) {
+  if(explosion == TRUE) {
+    subSearch(tag = "mesh", items = mesh)
+  } else {
+    subSearch(tag = "mesh_noexp", items = mesh)
+  }
 }
 
 #' Function to build a search query based on terms in the title and abstract
@@ -70,4 +75,15 @@ combineSearchStrategy <- function(...) {
   txt <- purrr::map_chr(dots, ~.x) %>%
     paste(collapse = " AND ")
   return(txt)
+}
+
+#' Function that removes keywords from the pubmed search strategy
+#' @param ... a list of different field tags to add to the search
+#' @export
+removeKeywords <- function(searchStrategy) {
+  searchSplit <- unlist(strsplit(searchStrategy," AND "))
+  searchSplit <- searchSplit[!grepl("MeSH", searchSplit)]
+
+  searchStrategy <- paste(searchSplit, collapse = " AND ")
+  return(searchStrategy)
 }
