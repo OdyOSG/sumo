@@ -5,10 +5,12 @@
 \title{Function to build a dictionary of all the MeSH terms in a result
 Prototype function used before MeSH mapping is complete}
 \usage{
-makeDict(res)
+makeDict(res, removeCommon = TRUE)
 }
 \arguments{
 \item{res}{A fetched sumo object containing PMIDs and key words}
+
+\item{removeCommon}{logical toggle to remove common keywords from dictionary}
 }
 \description{
 Function to build a dictionary of all the MeSH terms in a result

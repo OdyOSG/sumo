@@ -1,8 +1,10 @@
 #' Function to build a dictionary of all the MeSH terms in a result
 #' Prototype function used before MeSH mapping is complete
 #' @param res A fetched sumo object containing PMIDs and key words
+#' @param removeCommon logical toggle to remove common keywords from dictionary
 #' @export
 makeDict <- function(res, removeCommon = TRUE){
+  # TODO you ok switching to tibbles? Not pressing
   dict <- as.data.frame(table(unlist(strsplit(res$key_words, "; "))))
   colnames(dict) <- c("keyword","count")
   dict <- dict[!dict$keyword %in% commonKeywords(),]
@@ -21,7 +23,7 @@ plotKeywords <- function(res){
 }
 
 #' Function to pretty print Abstracts from a res object
-#' @param res
+#' @param res A fetched sumo object
 #' @export
 printAbstract <- function(res){
   resPrint <- res %>%
