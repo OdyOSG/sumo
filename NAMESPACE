@@ -11,6 +11,8 @@ export(makeDict)
 export(meshSearch)
 export(observationalStudy)
 export(removeKeywords)
+=======
+export(searchOmop)
 export(searchPubmed)
 export(textSearch)
 export(tiabSearch)
