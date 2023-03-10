@@ -38,3 +38,11 @@ observationalStudy <- function() {
   c("cohort", "case-control", "self-controlled", "retrospective analysis",
     "active comparator", "comparative effectiveness")
 }
+
+#' Function that lists common MeSH terms that are unlikely to be useful
+#' @export
+commonKeywords <- function() {
+  c("Humans", "Female", "Male", "Adult", "Middle Aged", "Young Adult",
+    "Adolescent", "Aged", "Child", "Child, Preschool", "Infant, Newborn",
+    "Infant", "Aged, 80 and over")
+}

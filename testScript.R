@@ -1,22 +1,28 @@
 library(sumo)
 library(rentrez)
 library(dplyr)
+library(tidyr)
 library(purrr)
+library(kableExtra)
+library(ggplot2)
 
 set_entrez_key("apiKey")
 
 journals <- journalSearch(highImpactJournals())
 
-timeFrame <- dateRange("2020/01/01", "2021/12/31")
+timeFrame <- dateRange("2018/01/01", "2022/12/31")
 
 terms <- textSearch(text = observationalStudy())
 
-searchStrategy <- combineSearchStrategy(terms, timeFrame, journals)
+meshTerm <- meshSearch("anemia")
 
-tst <- searchPubmed(searchStrategy)
+searchStrategy <- combineSearchStrategy(terms, timeFrame, journals, meshTerm)
 
-res <- fetchPubmed(tst)
+hits <- searchPubmed(searchStrategy)
 
+res <- fetchPubmed(hits)
+
+printAbstract(res)
 
 
 
