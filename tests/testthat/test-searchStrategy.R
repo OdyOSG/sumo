@@ -32,6 +32,15 @@ test_that("can build search strategy on terms", {
   expect_true(grepl("cohort", terms))
 })
 
+
+test_that("can build search strategy on mesh", {
+
+  mesh <- meshSearch(mesh = "Anemia")
+  expect_type(mesh, "character")
+  expect_true(grepl("Anemia", mesh))
+  expect_true(grepl("MeSH", mesh))
+})
+
 test_that("Combine search strategy", {
 
   journals <- journalSearch(highImpactJournals())
