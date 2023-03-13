@@ -61,7 +61,7 @@ fetchPubmed <- function(hits) {
     dplyr::rename(pmid=uid)
 
   tbl <- merge(tbl,dates,by="pmid") %>%
-    mutate(epubdate = ifelse(epubdate == "",paste(year," Jan 1",sep=""),epubdate))
+    dplyr::mutate(epubdate = ifelse(epubdate == "",paste(year," Jan 1",sep=""),epubdate))
 
   return(tbl)
 }
