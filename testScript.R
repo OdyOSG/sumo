@@ -76,8 +76,8 @@ plotDict$concepts
 
 plotDict$concepts <- factor(plotDict$concepts, levels = rev(plotDict$concepts))
 
-N <- 10
-N <- max(N,length(plotDict$concepts))
+N <- 15
+N <- min(N,length(plotDict$concepts))
 
 ggplot(plotDict[plotDict$domain_id == "Condition",][1:N,],
        aes(x=count,y=concepts,colour=concepts)) +
