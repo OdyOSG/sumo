@@ -33,10 +33,11 @@ mapMeshToConcept <- function(meshTerms, cdm) {
     dplyr::filter(concept_name %in% meshTerms, vocabulary_id == "MeSH") %>%
     dplyr::left_join(cdm$concept_relationship, by = c("concept_id" = "concept_id_2")) %>%
     dplyr::left_join(cdm$concept, by = c("concept_id_1" = "concept_id")) %>%
-    dplyr::select(concept_id_1,concept_name.y,concept_name.x) %>%
+    dplyr::select(concept_id_1,concept_name.y,concept_name.x,domain_id.y) %>%
     dplyr::collect() %>%
     dplyr::rename(MeSH_term = concept_name.x) %>%
-    dplyr::rename(concept_name = concept_name.y)
+    dplyr::rename(concept_name = concept_name.y) %>%
+    dplyr::rename(domain_id = domain_id.y)
 
   return(res)
 }
@@ -49,17 +50,7 @@ addConceptsToDict <- function(resDict, cdm){
 
   meshTerms <- resDict$MeSH_term
 
-  conceptDict <- cdm$concept %>%
-    dplyr::filter(concept_name %in% meshTerms, vocabulary_id == "MeSH") %>%
-    dplyr::left_join(cdm$concept_relationship,
-                     by = c("concept_id" = "concept_id_2")) %>%
-    dplyr::left_join(cdm$concept,
-                     by = c("concept_id_1" = "concept_id")) %>%
-    dplyr::select(concept_id_1,concept_name.y,concept_name.x,domain_id.y) %>%
-    dplyr::collect() %>%
-    dplyr::rename(MeSH_term = concept_name.x) %>%
-    dplyr::rename(concept_name = concept_name.y) %>%
-    dplyr::rename(domain_id = domain_id.y) %>%
+  conceptDict <- mapMeshToConcept(meshTerms, cdm) %>%
     dplyr::full_join(resDict,
                      by = c("MeSH_term" = "MeSH_term"))
 
