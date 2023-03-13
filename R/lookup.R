@@ -36,10 +36,10 @@ fetchPubmed <- function(hits) {
     abstract = purrr::map(res, ~.x$abstract),
     key_words = purrr::map(res, ~.x$key_words)
   ) %>%
-    group_by(pmid,title,journal,year,doi,key_words) %>%
-    summarise(abstract = paste(unlist(abstract), collapse = "<br><br>")) %>%
-    group_by(pmid,title,journal,year,doi,abstract) %>%
-    summarise(key_words = paste(unlist(key_words),collapse = "; "))
+    dplyr::group_by(pmid,title,journal,year,doi,key_words) %>%
+    dplyr::summarise(abstract = paste(unlist(abstract), collapse = "<br><br>")) %>%
+    dplyr::group_by(pmid,title,journal,year,doi,abstract) %>%
+    dplyr::summarise(key_words = paste(unlist(key_words),collapse = "; "))
 
   #Get denominator of search without keyword
   denom <- rentrez::entrez_search(
