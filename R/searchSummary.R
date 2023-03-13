@@ -11,8 +11,6 @@ makeDict <- function(res, cdm, removeCommon = TRUE){
 
   resDict <- addConceptsToDict(dict, cdm)
 
-
-
   return(resDict)
 }
 
@@ -21,41 +19,60 @@ makeDict <- function(res, cdm, removeCommon = TRUE){
 #' @export
 printAbstract <- function(res){
 
+  # Comment: wondering if you could functionalize this a bit more? The concept select throws it off
+  # a bit. Maybe functionalize the doi, paperInfo, and abstract mutates before the second select?
+
   if("concepts" %in% colnames(res)) {
     resPrint <- res %>%
-      select(pmid,title,abstract,journal,year,doi,key_words, concepts) %>%
-      mutate(doi = paste("doi: ",doi,sep="")) %>%
-      mutate(paperInfo = paste(paste(title, journal, year, sep = ",  "),"",doi,"",sep="<br>")) %>%
-      mutate(abstract = paste(abstract,"",sep="<br><br>")) %>%
-      ungroup() %>%
-      select(pmid, paperInfo, abstract, key_words, concepts) %>%
-      mutate(pmid = paste("PMID: ", pmid, sep="")) %>%
-      mutate(key_words = paste("MeSH terms: ", key_words, sep="")) %>%
-      pivot_longer(cols = c("paperInfo","abstract","key_words","concepts"))
+      dplyr::select(pmid,title,abstract,journal,year,doi,key_words, concepts) %>%
+      dplyr::mutate(doi = paste("doi: ", .data$doi, sep="")) %>%
+      dplyr::mutate(paperInfo = paste(
+        paste(.data$title, .data$journal, .data$year, sep = ",  "),
+        "",.data$doi,"", sep="<br>")
+        ) %>%
+      dplyr::mutate(abstract = paste(.data$abstract,"",sep="<br><br>")) %>%
+      dplyr::ungroup() %>% #why is there an ungroup, where is the groupby
+      dplyr::select(pmid, paperInfo, abstract, key_words, concepts) %>%
+      dplyr::mutate(pmid = paste("PMID: ", .data$pmid, sep="")) %>%
+      dplyr::mutate(key_words = paste("MeSH terms: ", .data$key_words, sep="")) %>%
+      tidyr::pivot_longer(cols = c("paperInfo","abstract","key_words","concepts"))
 
     resPrint[,c(3)] %>%
-      kable("html", escape = F, col.names = NULL) %>%
-      group_rows(index = setNames(rle(resPrint$pmid)[[1]],
-                                  rle(resPrint$pmid)[[2]])) %>%
-      kable_paper("hover", full_width = F)
+      knitr::kable("html", escape = F, col.names = NULL) %>%
+      #this chunk is a bit awk via pipe
+      kableExtra::group_rows(
+        index = setNames(
+          rle(resPrint$pmid)[[1]],
+          rle(resPrint$pmid)[[2]]
+          )
+        ) %>%
+      kableExtra::kable_paper("hover", full_width = F)
 
   } else {
     resPrint <- res %>%
-      select(pmid,title,abstract,journal,year,doi,key_words) %>%
-      mutate(doi = paste("doi: ",doi,sep="")) %>%
-      mutate(paperInfo = paste(paste(title, journal, year, sep = ",  "),"",doi,"",sep="<br>")) %>%
-      mutate(abstract = paste(abstract,"",sep="<br><br>")) %>%
-      ungroup() %>%
-      select(pmid, paperInfo, abstract, key_words) %>%
-      mutate(pmid = paste("PMID: ", pmid, sep="")) %>%
-      mutate(key_words = paste("MeSH terms: ", key_words, sep="")) %>%
-      pivot_longer(cols = c("paperInfo","abstract","key_words"))
+      dplyr::select(pmid,title,abstract,journal,year,doi,key_words) %>%
+      dplyr::mutate(doi = paste("doi: ", .data$doi, sep="")) %>%
+      dplyr::mutate(paperInfo = paste(
+        paste(.data$title, .data$journal, .data$year, sep = ",  "),
+        "",.data$doi,"", sep="<br>")
+      ) %>%
+      dplyr::mutate(abstract = paste(abstract,"",sep="<br><br>")) %>%
+      dplyr::ungroup() %>%
+      dplyr::select(pmid, paperInfo, abstract, key_words) %>%
+      dplyr::mutate(pmid = paste("PMID: ", pmid, sep="")) %>%
+      dplyr::mutate(key_words = paste("MeSH terms: ", key_words, sep="")) %>%
+      tidyr::pivot_longer(cols = c("paperInfo","abstract","key_words"))
 
     resPrint[,c(3)] %>%
-      kable("html", escape = F, col.names = NULL) %>%
-      group_rows(index = setNames(rle(resPrint$pmid)[[1]],
-                                rle(resPrint$pmid)[[2]])) %>%
-      kable_paper("hover", full_width = F)
+      knitr::kable("html", escape = F, col.names = NULL) %>%
+      #this chunk is a bit awk to read via pipe
+      kableExtra::group_rows(
+        index = setNames(
+          rle(resPrint$pmid)[[1]],
+          rle(resPrint$pmid)[[2]]
+        )
+      ) %>%
+      kableExtra::kable_paper("hover", full_width = F)
   }
 
 }
@@ -97,9 +114,9 @@ addDictToRes <- function(res, conceptDict){
   res <- res %>%
     dplyr::relocate(conceptIds, .after = key_words) %>%
     dplyr::relocate(conceptNames, .after = conceptIds) %>%
-    rowwise() %>%
-    mutate(concepts = paste(unlist(strsplit(conceptNames, ";|; "))," (",
-                            unlist(strsplit(conceptIds, ";|; ")),"); ",
+    dplyr::rowwise() %>%
+    dplyr::mutate(concepts = paste(unlist(strsplit(.data$conceptNames, ";|; "))," (",
+                            unlist(strsplit(.data$conceptIds, ";|; ")),"); ",
                             collapse="",sep=""))
 
   return(res)
