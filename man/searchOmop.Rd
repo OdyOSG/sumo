@@ -4,12 +4,14 @@
 \alias{searchOmop}
 \title{Function to build a search query based on omop concept ids}
 \usage{
-searchOmop(conceptIds, cdm)
+searchOmop(conceptIds, cdm, explosion = TRUE)
 }
 \arguments{
 \item{conceptIds}{a integer string of concept ids from OMOP vocabulary}
 
 \item{cdm}{a cdm_reference object created using the CDMConnector package}
+
+\item{explosion}{a toggle on whether or not to apply MeSH explosion to a query}
 }
 \description{
 Function to build a search query based on omop concept ids
