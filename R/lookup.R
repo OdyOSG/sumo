@@ -52,5 +52,16 @@ fetchPubmed <- function(hits) {
   tbl$count <- dim(tbl)[1]
   tbl$totalCount <- denom
 
+  #Add date information
+  dates <- rentrez::entrez_summary(
+    db = "pubmed",
+    web_history = hits$web_history) %>%
+    extract_from_esummary(c("uid","epubdate")) %>%
+    as.data.frame() %>% t() %>% as.data.frame() %>%
+    dplyr::rename(pmid=uid)
+
+  tbl <- merge(tbl,dates,by="pmid") %>%
+    mutate(epubdate = ifelse(epubdate == "",paste(year," Jan 1",sep=""),epubdate))
+
   return(tbl)
 }

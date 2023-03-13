@@ -8,6 +8,8 @@ meshSearch(mesh, explosion = TRUE)
 }
 \arguments{
 \item{mesh}{a character vector of mesh terms to use in the search}
+
+\item{explosion}{a toggle on whether or not to apply MeSH explosion to a query}
 }
 \description{
 Function to build a search query based on mesh terms

@@ -7,7 +7,7 @@
 printAbstract(res)
 }
 \arguments{
-\item{res}{A fetched sumo object}
+\item{res}{A fetched sumo object containing PMIDs and key words}
 }
 \description{
 Function to pretty print Abstracts from a res object

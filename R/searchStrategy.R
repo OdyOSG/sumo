@@ -28,6 +28,7 @@ journalSearch <- function(journals) {
 
 #' Function to build a search query based on mesh terms
 #' @param mesh a character vector of mesh terms to use in the search
+#' @param explosion a toggle on whether or not to apply MeSH explosion to a query
 #' @export
 meshSearch <- function(mesh, explosion = TRUE) {
   if(explosion == TRUE) {
