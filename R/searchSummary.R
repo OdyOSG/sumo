@@ -35,11 +35,13 @@ printAbstract <- function(res){
       dplyr::select(pmid, paperInfo, abstract, key_words, concepts) %>%
       dplyr::mutate(pmid = paste("PMID: ", .data$pmid, sep="")) %>%
       dplyr::mutate(key_words = paste("MeSH terms: ", .data$key_words, sep="")) %>%
+      dplyr::mutate(concepts = paste("OMOP Concepts (id): ", .data$concepts, sep="")) %>%
       tidyr::pivot_longer(cols = c("paperInfo","abstract","key_words","concepts"))
 
     resPrint[,c(3)] %>%
       knitr::kable("html", escape = F, col.names = NULL) %>%
       #this chunk is a bit awk via pipe
+      #important you scope this, thought it was dplyr::group_rows at first
       kableExtra::group_rows(
         index = setNames(
           rle(resPrint$pmid)[[1]],
