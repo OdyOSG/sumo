@@ -9,7 +9,9 @@ makeDict(res, cdm, removeCommon = TRUE)
 }
 \arguments{
 \item{res}{A fetched sumo object containing PMIDs and key words}
+
 \item{cdm}{a cdm_reference object created using the CDMConnector package}
+
 \item{removeCommon}{A toggle on whether or not to remove the most common keywords}
 }
 \description{
