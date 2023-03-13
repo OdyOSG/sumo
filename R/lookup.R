@@ -36,10 +36,10 @@ fetchPubmed <- function(hits) {
     abstract = purrr::map(res, ~.x$abstract),
     key_words = purrr::map(res, ~.x$key_words)
   ) %>%
-    group_by(pmid,title,journal,year,doi,key_words) %>%
-    summarise(abstract = paste(unlist(abstract), collapse = "<br><br>")) %>%
-    group_by(pmid,title,journal,year,doi,abstract) %>%
-    summarise(key_words = paste(unlist(key_words),collapse = "; "))
+    dplyr::group_by(pmid,title,journal,year,doi,key_words) %>%
+    dplyr::summarise(abstract = paste(unlist(abstract), collapse = "<br><br>")) %>%
+    dplyr::group_by(pmid,title,journal,year,doi,abstract) %>%
+    dplyr::summarise(key_words = paste(unlist(key_words),collapse = "; "))
 
   #Get denominator of search without keyword
   denom <- rentrez::entrez_search(
@@ -56,12 +56,12 @@ fetchPubmed <- function(hits) {
   dates <- rentrez::entrez_summary(
     db = "pubmed",
     web_history = hits$web_history) %>%
-    extract_from_esummary(c("uid","epubdate")) %>%
+    rentrez::extract_from_esummary(c("uid","epubdate")) %>%
     as.data.frame() %>% t() %>% as.data.frame() %>%
     dplyr::rename(pmid=uid)
 
   tbl <- merge(tbl,dates,by="pmid") %>%
-    mutate(epubdate = ifelse(epubdate == "",paste(year," Jan 1",sep=""),epubdate))
+    dplyr::mutate(epubdate = ifelse(epubdate == "",paste(year," Jan 1",sep=""),epubdate))
 
   return(tbl)
 }
