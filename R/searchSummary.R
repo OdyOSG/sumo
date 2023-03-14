@@ -31,7 +31,6 @@ printAbstract <- function(res){
         "",.data$doi,"", sep="<br>")
         ) %>%
       dplyr::mutate(abstract = paste(.data$abstract,"",sep="<br><br>")) %>%
-      dplyr::ungroup() %>% #why is there an ungroup, where is the groupby
       dplyr::select(pmid, paperInfo, abstract, key_words, concepts) %>%
       dplyr::mutate(pmid = paste("PMID: ", .data$pmid, sep="")) %>%
       dplyr::mutate(key_words = paste("MeSH terms: ", .data$key_words, sep="")) %>%
@@ -59,7 +58,6 @@ printAbstract <- function(res){
         "",.data$doi,"", sep="<br>")
       ) %>%
       dplyr::mutate(abstract = paste(abstract,"",sep="<br><br>")) %>%
-      dplyr::ungroup() %>%
       dplyr::select(pmid, paperInfo, abstract, key_words) %>%
       dplyr::mutate(pmid = paste("PMID: ", pmid, sep="")) %>%
       dplyr::mutate(key_words = paste("MeSH terms: ", key_words, sep="")) %>%
