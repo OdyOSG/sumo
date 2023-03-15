@@ -19,61 +19,36 @@ makeDict <- function(res, cdm, removeCommon = TRUE){
 #' @export
 printAbstract <- function(res){
 
-  # Comment: wondering if you could functionalize this a bit more? The concept select throws it off
-  # a bit. Maybe functionalize the doi, paperInfo, and abstract mutates before the second select?
+  resPrint <- res %>%
+    dplyr::mutate(
+      pmid = paste("PMID: ", .data$pmid, sep=""),
+      paperInfo = paste(paste("<b>", .data$title, "</b>", sep = ""),
+                        paste(.data$journal, ", ", .data$epubdate, sep = ""),
+                        paste("<b>DOI:</b> ", .data$doi, sep=""), sep = "<br>"),
+      abstract = paste(.data$abstract,"",sep="<br><br>"),
+      key_words = paste("<b>MeSH terms:</b> ", .data$key_words, sep=""))
 
   if("concepts" %in% colnames(res)) {
-    resPrint <- res %>%
-      dplyr::select(pmid,title,abstract,journal,year,doi,key_words, concepts) %>%
-      dplyr::mutate(doi = paste("doi: ", .data$doi, sep="")) %>%
-      dplyr::mutate(paperInfo = paste(
-        paste(.data$title, .data$journal, .data$year, sep = ",  "),
-        "",.data$doi,"", sep="<br>")
-        ) %>%
-      dplyr::mutate(abstract = paste(.data$abstract,"",sep="<br><br>")) %>%
+    resPrint <- resPrint %>%
       dplyr::select(pmid, paperInfo, abstract, key_words, concepts) %>%
-      dplyr::mutate(pmid = paste("PMID: ", .data$pmid, sep="")) %>%
-      dplyr::mutate(key_words = paste("MeSH terms: ", .data$key_words, sep="")) %>%
-      dplyr::mutate(concepts = paste("OMOP Concepts (id): ", .data$concepts, sep="")) %>%
+      dplyr::mutate(concepts = paste("<b>OMOP Concepts (ID):</b> ", .data$concepts, "<br>", sep="")) %>%
       tidyr::pivot_longer(cols = c("paperInfo","abstract","key_words","concepts"))
 
-    resPrint[,c(3)] %>%
-      knitr::kable("html", escape = F, col.names = NULL) %>%
-      #this chunk is a bit awk via pipe
-      #important you scope this, thought it was dplyr::group_rows at first
-      kableExtra::group_rows(
-        index = setNames(
-          rle(resPrint$pmid)[[1]],
-          rle(resPrint$pmid)[[2]]
-          )
-        ) %>%
-      kableExtra::kable_paper("hover", full_width = F)
-
   } else {
-    resPrint <- res %>%
-      dplyr::select(pmid,title,abstract,journal,year,doi,key_words) %>%
-      dplyr::mutate(doi = paste("doi: ", .data$doi, sep="")) %>%
-      dplyr::mutate(paperInfo = paste(
-        paste(.data$title, .data$journal, .data$year, sep = ",  "),
-        "",.data$doi,"", sep="<br>")
-      ) %>%
-      dplyr::mutate(abstract = paste(abstract,"",sep="<br><br>")) %>%
+    resPrint <- resPrint %>%
       dplyr::select(pmid, paperInfo, abstract, key_words) %>%
-      dplyr::mutate(pmid = paste("PMID: ", pmid, sep="")) %>%
-      dplyr::mutate(key_words = paste("MeSH terms: ", key_words, sep="")) %>%
       tidyr::pivot_longer(cols = c("paperInfo","abstract","key_words"))
-
-    resPrint[,c(3)] %>%
-      knitr::kable("html", escape = F, col.names = NULL) %>%
-      #this chunk is a bit awk to read via pipe
-      kableExtra::group_rows(
-        index = setNames(
-          rle(resPrint$pmid)[[1]],
-          rle(resPrint$pmid)[[2]]
-        )
-      ) %>%
-      kableExtra::kable_paper("hover", full_width = F)
   }
+
+  resPrint[,c(3)] %>%
+    knitr::kable("html", escape = F, col.names = NULL) %>%
+    kableExtra::pack_rows(
+      index = setNames(
+        rep(4,length(unique(resPrint$pmid))),
+        unique(resPrint$pmid)
+      )
+    ) %>%
+    kableExtra::kable_paper("hover", full_width = F)
 
 }
 
