@@ -87,8 +87,8 @@ addDictToRes <- function(res, conceptDict){
   res$conceptNames <- unlist(lapply(res$key_words,FUN = conceptName_Map, conceptDict = conceptDict))
 
   res <- res %>%
-    dplyr::relocate(conceptIds, .after = key_words) %>%
-    dplyr::relocate(conceptNames, .after = conceptIds) %>%
+    dplyr::relocate(.data$conceptIds, .after = key_words) %>%
+    dplyr::relocate(.data$conceptNames, .after = conceptIds) %>%
     dplyr::rowwise() %>%
     dplyr::mutate(concepts = paste(unlist(strsplit(.data$conceptNames, ";|; "))," (",
                             unlist(strsplit(.data$conceptIds, ";|; ")),"); ",

@@ -4,10 +4,11 @@ mapConceptToMesh <- function(conceptIds, cdm) {
   checkmate::assertClass(cdm, "cdm_reference")
 
   res <- cdm$concept_relationship %>%
-    dplyr::filter(concept_id_1 %in% conceptIds, relationship_id == "Mapped from") %>%
+    dplyr::filter(.data$concept_id_1 %in% conceptIds,
+                  .data$relationship_id == "Mapped from") %>%
     dplyr::left_join(cdm$concept, by = c("concept_id_2" = "concept_id")) %>%
-    dplyr::filter(vocabulary_id == "MeSH") %>%
-    dplyr::select(concept_name) %>%
+    dplyr::filter(.data$vocabulary_id == "MeSH") %>%
+    dplyr::select(.data$concept_name) %>%
     dplyr::collect() %>%
     dplyr::pull()
 
@@ -30,14 +31,15 @@ mapMeshToConcept <- function(meshTerms, cdm) {
   checkmate::assertClass(cdm, "cdm_reference")
 
   res <- cdm$concept %>%
-    dplyr::filter(concept_name %in% meshTerms, vocabulary_id == "MeSH") %>%
+    dplyr::filter(.data$concept_name %in% meshTerms, .data$vocabulary_id == "MeSH") %>%
     dplyr::left_join(cdm$concept_relationship, by = c("concept_id" = "concept_id_2")) %>%
     dplyr::left_join(cdm$concept, by = c("concept_id_1" = "concept_id")) %>%
-    dplyr::select(concept_id_1,concept_name.y,concept_name.x,domain_id.y) %>%
+    dplyr::select(concept_id_1,concept_name.y,
+                  concept_name.x,domain_id.y) %>%
     dplyr::collect() %>%
-    dplyr::rename(MeSH_term = concept_name.x) %>%
-    dplyr::rename(concept_name = concept_name.y) %>%
-    dplyr::rename(domain_id = domain_id.y)
+    dplyr::rename(MeSH_term = .data$concept_name.x) %>%
+    dplyr::rename(concept_name = .data$concept_name.y) %>%
+    dplyr::rename(domain_id = .data$domain_id.y)
 
   return(res)
 }

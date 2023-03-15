@@ -7,7 +7,7 @@
 tiabSearch(tiab)
 }
 \arguments{
-\item{mesh}{a character vector of terms in the title and abstract to use in the search}
+\item{tiab}{a character vector of terms in the title and abstract to use in the search}
 }
 \description{
 Function to build a search query based on terms in the title and abstract

@@ -1,3 +1,5 @@
 ^sumo\.Rproj$
 ^\.Rproj\.user$
 ^LICENSE\.md$
+errorReportSql.txt
+scratch/
