@@ -12,6 +12,8 @@ Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.2.3
 Imports:
   dplyr,
+  CDMConnector,
+  scales,
   magrittr,
   kableExtra,
   checkmate,
@@ -23,6 +25,7 @@ Imports:
   tidyr,
   stats,
   graphics,
+  ggplot2,
   knitr
 Suggests: 
     testthat (>= 3.0.0)

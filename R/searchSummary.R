@@ -11,6 +11,22 @@ makeDict <- function(res, cdm, removeCommon = TRUE){
 
   resDict <- addConceptsToDict(dict, cdm)
 
+  resDict[grepl("Studies|Survey",resDict$MeSH_term,ignore.case = T) &
+            is.na(resDict$domain_id),]$domain_id <- "Study"
+
+  resDict[grepl("Index|Model|Estimate|Ratio",resDict$MeSH_term,ignore.case = T) &
+            is.na(resDict$domain_id),]$domain_id <- "Statistic"
+
+  #Mapping the few exceptions to the ggplot2 world_coordinates data and MeSH terms
+  world_coordinates <- ggplot2::map_data("world")
+
+  resDict[resDict$MeSH_term == "Republic of Korea",]$MeSH_term <- "South Korea"
+  resDict[resDict$MeSH_term == "United States",]$MeSH_term <- "USA"
+
+  resDict[grepl(paste(unique(world_coordinates$region),collapse="|"),resDict$MeSH_term,ignore.case = T) &
+                  is.na(resDict$domain_id),]$domain_id <- "Country"
+
+
   return(resDict)
 }
 
@@ -44,7 +60,7 @@ printAbstract <- function(res){
     knitr::kable("html", escape = F, col.names = NULL) %>%
     kableExtra::pack_rows(
       index = setNames(
-        rep(4,length(unique(resPrint$pmid))),
+        rep(length(unique(resPrint$name)),length(unique(resPrint$pmid))),
         unique(resPrint$pmid)
       )
     ) %>%
