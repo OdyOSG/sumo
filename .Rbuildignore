@@ -3,3 +3,5 @@
 ^LICENSE\.md$
 errorReportSql.txt
 scratch/
+bibs/
+bibs.bib

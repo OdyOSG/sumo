@@ -32,7 +32,17 @@ makePlotDict <- function(conceptDict, domain){
 plotResultsBar <- function(res, domain, N, conceptDict){
   eb <- ggplot2::element_blank()
 
-  plotDict <- makePlotDict(conceptDict,domain)
+  if(domain == "Journal"){
+
+    plotDict <- as.data.frame(table(res$journal))
+    colnames(plotDict) <- c("concepts","count")
+    plotDict <- plotDict[order(plotDict$count, decreasing = T),]
+
+  } else {
+
+    plotDict <- makePlotDict(conceptDict,domain)
+
+  }
 
   plotDict$concepts <- factor(plotDict$concepts, levels = rev(plotDict$concepts))
 

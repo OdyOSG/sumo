@@ -162,3 +162,26 @@ cumuDate <- function(res){
   }
   return(cumuDate)
 }
+
+#' Outputs a bib file containing all result BibTeXs, derived via doi
+#' @param res a cdm_reference object created using the CDMConnector package
+#' @export
+exportBib <- function(res,outfile = "bibs.bib"){
+
+  DOIlist <- res$doi
+
+  h <- curl::new_handle()
+  curl::handle_setheaders(h, "accept" = "application/x-bibtex")
+
+  urls <- c()
+  for (i in 1:length(DOIlist)) {
+    urls <- c(urls,paste0("https://doi.org/", DOIlist[i]))
+  }
+
+  purrr::walk(urls, ~ {
+    curl::curl(., handle = h) %>%
+        readLines(warn = FALSE) %>%
+        write(file = outfile, append = TRUE)
+  })
+
+}

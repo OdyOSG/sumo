@@ -15,6 +15,7 @@ Imports:
   CDMConnector,
   scales,
   lubridate,
+  curl,
   magrittr,
   kableExtra,
   checkmate,
