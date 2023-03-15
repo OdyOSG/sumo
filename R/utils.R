@@ -12,3 +12,12 @@
 #' @param rhs A function call using the magrittr semantics.
 #' @return The result of calling `rhs(lhs)`.
 NULL
+
+#' Lubridate month operator
+#'
+#' @name %m+%
+#' @rdname monthPlus
+#' @keywords internal
+#' @export
+#' @importFrom lubridate "%m+%"
+NULL

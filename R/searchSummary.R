@@ -11,6 +11,12 @@ makeDict <- function(res, cdm, removeCommon = TRUE){
 
   resDict <- addConceptsToDict(dict, cdm)
 
+  #Remove concepts which have an ID but no name
+  #What do these even refer to?
+  resDict <- resDict %>%
+    dplyr::filter(!(!is.na(.data$concept_id_1) & is.na(.data$concept_name == "")))
+
+  #Add on extra domains for studies and stats
   resDict[grepl("Studies|Survey",resDict$MeSH_term,ignore.case = T) &
             is.na(resDict$domain_id),]$domain_id <- "Study"
 
@@ -23,9 +29,9 @@ makeDict <- function(res, cdm, removeCommon = TRUE){
   resDict[resDict$MeSH_term == "Republic of Korea",]$MeSH_term <- "South Korea"
   resDict[resDict$MeSH_term == "United States",]$MeSH_term <- "USA"
 
-  resDict[grepl(paste(unique(world_coordinates$region),collapse="|"),resDict$MeSH_term,ignore.case = T) &
-                  is.na(resDict$domain_id),]$domain_id <- "Country"
-
+  resDict[grepl(paste(unique(world_coordinates$region),collapse="|"),
+                resDict$MeSH_term,ignore.case = T) &
+                is.na(resDict$domain_id),]$domain_id <- "Country"
 
   return(resDict)
 }
@@ -68,6 +74,8 @@ printAbstract <- function(res){
 
 }
 
+
+
 conceptID_Map <- function(keywords, conceptDict) {
 
   conceptIds <- conceptDict[conceptDict$MeSH_term %in%
@@ -79,6 +87,8 @@ conceptID_Map <- function(keywords, conceptDict) {
   return(conceptIds)
 
 }
+
+
 
 conceptName_Map <- function(keywords, conceptDict) {
 
@@ -112,4 +122,43 @@ addDictToRes <- function(res, conceptDict){
 
   return(res)
 
+}
+
+#' Creates a cumulative sum matrix with dates as rows and key words as columns
+#' @param res a cdm_reference object created using the CDMConnector package
+#' @return cumuDate A matrix of the cumulative sum of key words by date
+#' @export
+cumuDate <- function(res){
+
+  #Setup matrix with correct row/col names and lengths
+  cumuDate <- as.data.frame(matrix(nrow = length(unique(res$epubdate)),
+                                   ncol = length(unique(unlist(strsplit(unlist(res$key_words),";|; "))))))
+
+  rownames(cumuDate) <- unique(res$epubdate)
+  colnames(cumuDate) <- unique(unlist(strsplit(unlist(res$key_words),";|; ")))
+
+  #Order both matrix and res by date
+  cumuDate <- cumuDate[order(rownames(cumuDate)),]
+  res <- res[order(res$epubdate),]
+
+  #Set the first row to 0 occurences
+  cumuDate[as.character(res[1,]$epubdate),] <- 0
+
+  #Handle first row by adding one to each key word column where found
+  for(term in unlist(strsplit(res[1,]$key_words,";|; "))) {
+    cumuDate[as.character(res[1,]$epubdate),term] <- 1
+  }
+
+  #Iterate over each term found in each result row, first setting each row to the same
+  #as the previous row, and then adding one to each key word column where found
+  for(i in c(2:length(res$epubdate))){
+    cumuDate[as.character(res[i,]$epubdate),] <-
+      cumuDate[as.character(res[i-1,]$epubdate),]
+
+    for(term in unlist(strsplit(res[i,]$key_words,";|; "))) {
+      cumuDate[as.character(res[i,]$epubdate),term] <-
+        cumuDate[as.character(res[i-1,]$epubdate),term] + 1
+    }
+  }
+  return(cumuDate)
 }

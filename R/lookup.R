@@ -66,5 +66,7 @@ fetchPubmed <- function(hits) {
     dplyr::mutate(epubdate = ifelse(.data$epubdate == "",
                                     paste(year," Jan 1",sep=""),.data$epubdate))
 
+  tbl$epubdate <- lubridate::as_date(as.character(tbl$epubdate))
+
   return(tbl)
 }
