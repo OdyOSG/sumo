@@ -165,6 +165,7 @@ cumuDate <- function(res){
 
 #' Outputs a bib file containing all result BibTeXs, derived via doi
 #' @param res a cdm_reference object created using the CDMConnector package
+#' @param outfile a string file name to store bib output
 #' @export
 exportBib <- function(res,outfile = "bibs.bib"){
 
