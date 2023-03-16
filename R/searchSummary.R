@@ -45,6 +45,7 @@ printAbstract <- function(res, plot = TRUE){
     dplyr::mutate(
       pmid = paste("<b>PMID:</b> ", .data$pmid, sep=""),
       title = paste("<b>", .data$title, "</b>", sep = ""),
+      doi = paste("<b>DOI:</b> ", .data$doi, sep = ""),
       key_words = paste("<b>MeSH terms:</b> ", .data$key_words, sep=""),
       abstract = gsub("<br><br>","<br><br>&emsp;",.data$abstract))
 
@@ -55,11 +56,12 @@ printAbstract <- function(res, plot = TRUE){
     resPrint <- resPrint %>%
       dplyr::mutate(display =
                       paste(pmid,"<br><br>",
-                            "&emsp;",title,"<br><br>",
-                            "&emsp;",journal,", ",year,"<br><br>",
-                            "&emsp;",abstract,"<br><br>",
-                            "&emsp;",key_words,"<br><br>",
-                            "&emsp;",concepts,"<br><br><br>",sep=""))
+                            "&emsp;",.data$title,"<br><br>",
+                            "&emsp;",.data$journal,", ",year,"<br><br>",
+                            "&emsp;",.data$doi,"<br><br>",
+                            "&emsp;",.data$abstract,"<br><br>",
+                            "&emsp;",.data$key_words,"<br><br>",
+                            "&emsp;",.data$concepts,"<br><br><br>",sep=""))
 
 
 
@@ -68,10 +70,11 @@ printAbstract <- function(res, plot = TRUE){
     resPrint <- resPrint %>%
       dplyr::mutate(display =
                       paste(pmid,"<br><br>",
-                            "&emsp;",title,"<br><br>",
-                            "&emsp;",journal,", ",year,"<br><br>",
-                            "&emsp;",abstract,"<br><br>",
-                            "&emsp;",key_words,"<br><br><br>",sep=""))
+                            "&emsp;",.data$title,"<br><br>",
+                            "&emsp;",.data$journal,", ",year,"<br><br>",,
+                            "&emsp;",.data$doi,"<br><br>",
+                            "&emsp;",.data$abstract,"<br><br>",
+                            "&emsp;",.data$key_words,"<br><br><br>",sep=""))
   }
 
   if(plot == TRUE){
