@@ -17,8 +17,9 @@ searchPubmed <- function(searchStrategy) {
 
 #' Fetch the results of a pubmed search
 #' @param hits the ouptu of searchPubmed or an esearch list from the 'rentrez' package
+#' @param searchStrategy a search strategy built using sumo
 #' @export
-fetchPubmed <- function(hits) {
+fetchPubmed <- function(hits, searchStrategy) {
   # fetch the pmids and return xml
   res <- rentrez::entrez_fetch(
     db = "pubmed",
