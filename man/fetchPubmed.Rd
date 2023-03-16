@@ -4,10 +4,12 @@
 \alias{fetchPubmed}
 \title{Fetch the results of a pubmed search}
 \usage{
-fetchPubmed(hits)
+fetchPubmed(hits, searchStrategy)
 }
 \arguments{
 \item{hits}{the ouptu of searchPubmed or an esearch list from the 'rentrez' package}
+
+\item{searchStrategy}{a search strategy built using sumo}
 }
 \description{
 Fetch the results of a pubmed search

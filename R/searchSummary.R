@@ -43,35 +43,42 @@ printAbstract <- function(res){
 
   resPrint <- res %>%
     dplyr::mutate(
-      pmid = paste("PMID: ", .data$pmid, sep=""),
-      paperInfo = paste(paste("<b>", .data$title, "</b>", sep = ""),
-                        paste(.data$journal, ", ", .data$epubdate, sep = ""),
-                        paste("<b>DOI:</b> ", .data$doi, sep=""), sep = "<br>"),
-      abstract = paste(.data$abstract,"",sep="<br><br>"),
-      key_words = paste("<b>MeSH terms:</b> ", .data$key_words, sep=""))
+      pmid = paste("<b>PMID:</b> ", .data$pmid, sep=""),
+      title = paste("<b>", .data$title, "</b>", sep = ""),
+      key_words = paste("<b>MeSH terms:</b> ", .data$key_words, sep=""),
+      abstract = gsub("<br><br>","<br><br>&emsp;",.data$abstract))
 
-  if("concepts" %in% colnames(res)) {
+  if("concepts" %in% colnames(res)){
     resPrint <- resPrint %>%
-      dplyr::select(pmid, paperInfo, abstract, key_words, concepts) %>%
-      dplyr::mutate(concepts = paste("<b>OMOP Concepts (ID):</b> ", .data$concepts, "<br>", sep="")) %>%
-      tidyr::pivot_longer(cols = c("paperInfo","abstract","key_words","concepts"))
+      dplyr::mutate(concepts = paste("<b>OMOP Concepts (IDs):</b> ", .data$concepts))
+
+    resPrint2 <- resPrint %>%
+      dplyr::mutate(display =
+                      paste(pmid,"<br><br>",
+                            "&emsp;",title,"<br><br>",
+                            "&emsp;",journal,", ",year,"<br><br>",
+                            "&emsp;",abstract,"<br><br>",
+                            "&emsp;",key_words,"<br><br>",
+                            "&emsp;",concepts,"<br><br><br>",sep=""))
+
+    resPrint2$display %>%
+      knitr::kable("html", escape = F, col.names = NULL) %>%
+      kableExtra::kable_paper(full_width = F)
+
 
   } else {
-    resPrint <- resPrint %>%
-      dplyr::select(pmid, paperInfo, abstract, key_words) %>%
-      tidyr::pivot_longer(cols = c("paperInfo","abstract","key_words"))
+    resPrint2 <- resPrint %>%
+      dplyr::mutate(display =
+                      paste(pmid,"<br><br>",
+                            "&emsp;",title,"<br><br>",
+                            "&emsp;",journal,", ",year,"<br><br>",
+                            "&emsp;",abstract,"<br><br>",
+                            "&emsp;",key_words,"<br><br><br>",sep=""))
+
+    resPrint2$display %>%
+      knitr::kable("html", escape = F, col.names = NULL) %>%
+      kableExtra::kable_paper(full_width = F)
   }
-
-  resPrint[,c(3)] %>%
-    knitr::kable("html", escape = F, col.names = NULL) %>%
-    kableExtra::pack_rows(
-      index = setNames(
-        rep(length(unique(resPrint$name)),length(unique(resPrint$pmid))),
-        unique(resPrint$pmid)
-      )
-    ) %>%
-    kableExtra::kable_paper("hover", full_width = F)
-
 }
 
 

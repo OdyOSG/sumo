@@ -58,10 +58,16 @@ fetchPubmed <- function(hits, searchStrategy) {
   #Add date information
   dates <- rentrez::entrez_summary(
     db = "pubmed",
-    web_history = hits$web_history) %>%
-    rentrez::extract_from_esummary(c("uid","epubdate")) %>%
-    as.data.frame() %>% t() %>% as.data.frame() %>%
-    dplyr::rename(pmid=.data$uid)
+    web_history = hits$web_history, retmode = "xml") %>%
+    rentrez::extract_from_esummary(c("PubDate","EPubDate")) %>%
+    as.data.frame() %>% t() %>% as.data.frame()
+
+  dates[dates$EPubDate=="NULL",]$EPubDate <- dates[dates$EPubDate=="NULL",]$PubDate
+
+  dates <- dates %>%
+    dplyr::mutate(pmid = rownames(dates)) %>%
+    dplyr::rename(epubdate=.data$EPubDate,) %>%
+    dplyr::select(pmid,epubdate)
 
   tbl <- merge(tbl,dates,by="pmid") %>%
     dplyr::mutate(epubdate = ifelse(.data$epubdate == "",
