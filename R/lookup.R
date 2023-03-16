@@ -90,13 +90,14 @@ fetchPubmed <- function(hits, searchStrategy) {
   tbl2 <- tbl %>%
     dplyr::left_join(dates, by = "pmid") %>%
     dplyr::mutate(
-      epubdate = ifelse(.data$epubdate == "", paste(.data$year, " Jan 1",sep=""), .data$epubdate),
-      epubdate = as.character(quiet_date(as.character(.data$epubdate))$result),
-      epubdate2 = ifelse(is.na(epubdate), lubridate::ymd(.data$year, truncated = 2L), epubdate)
-    )
+      epubdate = quiet_date(as.character(.data$epubdate))$result,
+      epubdate2 = lubridate::ymd(.data$year, truncated = 2L),
+      epubdate = dplyr::coalesce(epubdate, epubdate2)
+    ) %>%
+    dplyr::select(-epubdate2)
 
 
-  return(tbl)
+  return(tbl2)
 }
 
 
