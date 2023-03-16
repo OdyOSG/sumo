@@ -74,12 +74,13 @@ printAbstract <- function(res, plot = TRUE){
   }
 
   if(plot == TRUE){
-    resPrint$display %>%
+    res <- resPrint$display %>%
       knitr::kable("html", escape = F, col.names = NULL) %>%
       kableExtra::kable_paper(full_width = F)
-  } else {
-      return(resPrint$display)
+  } else{
+    res <- resPrint$display
   }
+  return(res)
 }
 
 
@@ -177,7 +178,7 @@ cumuDate <- function(res){
 #' @param res a cdm_reference object created using the CDMConnector package
 #' @param outfile a string file name to store bib output
 #' @export
-exportBib <- function(res,outfile = "bibs.bib"){
+exportBib <- function(res, outfile = "bibs.bib"){
 
   DOIlist <- res$doi
 

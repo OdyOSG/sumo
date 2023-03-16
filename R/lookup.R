@@ -36,13 +36,26 @@ fetchPubmed <- function(hits, searchStrategy) {
     doi = purrr::map_chr(res, ~.x$doi),
     abstract = purrr::map(res, ~.x$abstract),
     key_words = purrr::map(res, ~.x$key_words)
-  ) %>%
-    dplyr::group_by(.data$pmid,.data$title,.data$journal,
-                    .data$year,.data$doi,.data$key_words) %>%
-    dplyr::summarise(abstract = paste(unlist(.data$abstract), collapse = "<br><br>")) %>%
-    dplyr::group_by(.data$pmid,.data$title,.data$journal,
-                    .data$year,.data$doi,.data$abstract) %>%
-    dplyr::summarise(key_words = paste(unlist(.data$key_words),collapse = "; "))
+    ) %>%
+    dplyr::group_by(
+      .data$pmid, .data$title, .data$journal,
+      .data$year, .data$doi, .data$key_words
+      ) %>%
+    dplyr::summarise(
+      abstract = paste(unlist(.data$abstract), collapse = "<br><br>")
+      ) %>%
+    dplyr::group_by(
+      .data$pmid, .data$title, .data$journal,
+      .data$year, .data$doi, .data$abstract
+      ) %>%
+    dplyr::summarise(
+      key_words = paste(unlist(.data$key_words),collapse = "; ")
+      ) %>%
+    dplyr::ungroup() %>%
+    dplyr::mutate(
+      abstract = paste(.data$abstract, "\n", sep = ""),
+      count = dplyr::n_distinct(pmid)
+    )
 
   #Get denominator of search without keyword
   denom <- rentrez::entrez_search(
@@ -51,8 +64,8 @@ fetchPubmed <- function(hits, searchStrategy) {
     retmax = 10000
   )$count
 
-  tbl$abstract <- paste(tbl$abstract, "\n", sep="")
-  tbl$count <- dim(tbl)[1]
+  #tbl$abstract <- paste(tbl$abstract, "\n", sep="")
+  #tbl$count <-  nrow(tbl)
   tbl$totalCount <- denom
 
   #Add date information
@@ -60,20 +73,49 @@ fetchPubmed <- function(hits, searchStrategy) {
     db = "pubmed",
     web_history = hits$web_history, retmode = "xml") %>%
     rentrez::extract_from_esummary(c("PubDate","EPubDate")) %>%
-    as.data.frame() %>% t() %>% as.data.frame()
+    as.data.frame() %>%
+    tibble::rownames_to_column() %>%
+    tidyr::pivot_longer(-rowname, 'pmid', 'value') %>%
+    tidyr::pivot_wider(id_cols = pmid,
+                       names_from = rowname,
+                       values_from = value) %>%
+    dplyr::mutate(
+      EPubDate = dplyr::na_if(EPubDate, "NULL"),
+      epubdate = dplyr::coalesce(.data$EPubDate, .data$PubDate)
+    ) %>%
+    dplyr::select(pmid, epubdate)
 
-  dates[dates$EPubDate=="NULL",]$EPubDate <- dates[dates$EPubDate=="NULL",]$PubDate
+  quiet_date <- purrr::quietly(lubridate::as_date)
 
-  dates <- dates %>%
-    dplyr::mutate(pmid = rownames(dates)) %>%
-    dplyr::rename(epubdate=.data$EPubDate,) %>%
-    dplyr::select(pmid,epubdate)
+  tbl2 <- tbl %>%
+    dplyr::left_join(dates, by = "pmid") %>%
+    dplyr::mutate(
+      epubdate = ifelse(.data$epubdate == "", paste(.data$year, " Jan 1",sep=""), .data$epubdate),
+      epubdate = as.character(quiet_date(as.character(.data$epubdate))$result),
+      epubdate2 = ifelse(is.na(epubdate), lubridate::ymd(.data$year, truncated = 2L), epubdate)
+    )
 
-  tbl <- merge(tbl,dates,by="pmid") %>%
-    dplyr::mutate(epubdate = ifelse(.data$epubdate == "",
-                                    paste(year," Jan 1",sep=""),.data$epubdate))
-
-  tbl$epubdate <- lubridate::as_date(as.character(tbl$epubdate))
 
   return(tbl)
 }
+
+
+
+dates <- rentrez::entrez_summary(
+  db = "pubmed",
+  web_history = hits$web_history, retmode = "xml") %>%
+  rentrez::extract_from_esummary(c("PubDate","EPubDate")) %>%
+  as.data.frame() %>% t() %>% as.data.frame()
+
+dates[dates$EPubDate=="NULL",]$EPubDate <- dates[dates$EPubDate=="NULL",]$PubDate
+
+dates <- dates %>%
+  dplyr::mutate(pmid = rownames(dates)) %>%
+  dplyr::rename(epubdate=.data$EPubDate,) %>%
+  dplyr::select(pmid,epubdate)
+
+tbl <- merge(tbl,dates,by="pmid") %>%
+  dplyr::mutate(epubdate = ifelse(.data$epubdate == "",
+                                  paste(year," Jan 1",sep=""),.data$epubdate))
+
+tbl$epubdate <- lubridate::as_date(as.character(tbl$epubdate))
