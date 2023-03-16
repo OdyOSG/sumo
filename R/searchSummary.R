@@ -56,34 +56,30 @@ printAbstract <- function(res, plot = TRUE){
     resPrint <- resPrint %>%
       dplyr::mutate(display =
                       paste(pmid,"<br><br>",
-                            "&emsp;",.data$title,"<br><br>",
-                            "&emsp;",.data$journal,", ",year,"<br><br>",
-                            "&emsp;",.data$doi,"<br><br>",
-                            "&emsp;",.data$abstract,"<br><br>",
-                            "&emsp;",.data$key_words,"<br><br>",
-                            "&emsp;",.data$concepts,"<br><br><br>",sep=""))
-
-
-
-
+                            "&emsp;&emsp;",.data$title,"<br><br>",
+                            "&emsp;&emsp;",.data$journal,", ",year,"<br><br>",
+                            "&emsp;&emsp;",.data$doi,"<br><br>",
+                            "&emsp;&emsp;",.data$abstract,"<br><br>",
+                            "&emsp;&emsp;",.data$key_words,"<br><br>",
+                            "&emsp;&emsp;",.data$concepts,"<br><br><br>",sep=""))
   } else {
     resPrint <- resPrint %>%
       dplyr::mutate(display =
                       paste(pmid,"<br><br>",
-                            "&emsp;",.data$title,"<br><br>",
-                            "&emsp;",.data$journal,", ",year,"<br><br>",,
-                            "&emsp;",.data$doi,"<br><br>",
-                            "&emsp;",.data$abstract,"<br><br>",
-                            "&emsp;",.data$key_words,"<br><br><br>",sep=""))
+                            "&emsp;&emsp;",.data$title,"<br><br>",
+                            "&emsp;&emsp;",.data$journal,", ",year,"<br><br>",
+                            "&emsp;&emsp;",.data$doi,"<br><br>",
+                            "&emsp;&emsp;",.data$abstract,"<br><br>",
+                            "&emsp;&emsp;",.data$key_words,"<br><br><br>",sep=""))
   }
 
   if(plot == TRUE){
     resPrint$display %>%
       knitr::kable("html", escape = F, col.names = NULL) %>%
       kableExtra::kable_paper(full_width = F)
+  } else {
+      return(resPrint$display)
   }
-
-  return(resPrint$display)
 }
 
 
@@ -142,34 +138,36 @@ addDictToRes <- function(res, conceptDict){
 #' @export
 cumuDate <- function(res){
 
+  resDate <- res[!is.na(res$epubdate),]
+
   #Setup matrix with correct row/col names and lengths
-  cumuDate <- as.data.frame(matrix(nrow = length(unique(res$epubdate)),
-                                   ncol = length(unique(unlist(strsplit(unlist(res$key_words),";|; "))))))
+  cumuDate <- as.data.frame(matrix(nrow = length(unique(resDate$epubdate)),
+                                   ncol = length(unique(unlist(strsplit(unlist(resDate$key_words),";|; "))))))
 
-  rownames(cumuDate) <- unique(res$epubdate)
-  colnames(cumuDate) <- unique(unlist(strsplit(unlist(res$key_words),";|; ")))
+  rownames(cumuDate) <- unique(resDate$epubdate)
+  colnames(cumuDate) <- unique(unlist(strsplit(unlist(resDate$key_words),";|; ")))
 
-  #Order both matrix and res by date
+  #Order both matrix and resDate by date
   cumuDate <- cumuDate[order(rownames(cumuDate)),]
-  res <- res[order(res$epubdate),]
+  resDate <- resDate[order(resDate$epubdate),]
 
   #Set the first row to 0 occurences
-  cumuDate[as.character(res[1,]$epubdate),] <- 0
+  cumuDate[as.character(resDate[1,]$epubdate),] <- 0
 
   #Handle first row by adding one to each key word column where found
-  for(term in unlist(strsplit(res[1,]$key_words,";|; "))) {
-    cumuDate[as.character(res[1,]$epubdate),term] <- 1
+  for(term in unlist(strsplit(resDate[1,]$key_words,";|; "))) {
+    cumuDate[as.character(resDate[1,]$epubdate),term] <- 1
   }
 
-  #Iterate over each term found in each result row, first setting each row to the same
+  #Iterate over each term found in each resDateult row, first setting each row to the same
   #as the previous row, and then adding one to each key word column where found
-  for(i in c(2:length(res$epubdate))){
-    cumuDate[as.character(res[i,]$epubdate),] <-
-      cumuDate[as.character(res[i-1,]$epubdate),]
+  for(i in c(2:length(resDate$epubdate))){
+    cumuDate[as.character(resDate[i,]$epubdate),] <-
+      cumuDate[as.character(resDate[i-1,]$epubdate),]
 
-    for(term in unlist(strsplit(res[i,]$key_words,";|; "))) {
-      cumuDate[as.character(res[i,]$epubdate),term] <-
-        cumuDate[as.character(res[i-1,]$epubdate),term] + 1
+    for(term in unlist(strsplit(resDate[i,]$key_words,";|; "))) {
+      cumuDate[as.character(resDate[i,]$epubdate),term] <-
+        cumuDate[as.character(resDate[i-1,]$epubdate),term] + 1
     }
   }
   return(cumuDate)
