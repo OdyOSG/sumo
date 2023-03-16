@@ -39,7 +39,7 @@ makeDict <- function(res, cdm, removeCommon = TRUE){
 #' Function to pretty print Abstracts from a res object
 #' @param res A fetched sumo object containing PMIDs and key words
 #' @export
-printAbstract <- function(res){
+printAbstract <- function(res, plot = TRUE){
 
   resPrint <- res %>%
     dplyr::mutate(
@@ -61,9 +61,7 @@ printAbstract <- function(res){
                             "&emsp;",key_words,"<br><br>",
                             "&emsp;",concepts,"<br><br><br>",sep=""))
 
-    resPrint$display %>%
-      knitr::kable("html", escape = F, col.names = NULL) %>%
-      kableExtra::kable_paper(full_width = F)
+
 
 
   } else {
@@ -74,7 +72,9 @@ printAbstract <- function(res){
                             "&emsp;",journal,", ",year,"<br><br>",
                             "&emsp;",abstract,"<br><br>",
                             "&emsp;",key_words,"<br><br><br>",sep=""))
+  }
 
+  if(plot == TRUE){
     resPrint$display %>%
       knitr::kable("html", escape = F, col.names = NULL) %>%
       kableExtra::kable_paper(full_width = F)
