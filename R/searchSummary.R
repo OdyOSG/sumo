@@ -52,7 +52,7 @@ printAbstract <- function(res){
     resPrint <- resPrint %>%
       dplyr::mutate(concepts = paste("<b>OMOP Concepts (IDs):</b> ", .data$concepts))
 
-    resPrint2 <- resPrint %>%
+    resPrint <- resPrint %>%
       dplyr::mutate(display =
                       paste(pmid,"<br><br>",
                             "&emsp;",title,"<br><br>",
@@ -61,13 +61,13 @@ printAbstract <- function(res){
                             "&emsp;",key_words,"<br><br>",
                             "&emsp;",concepts,"<br><br><br>",sep=""))
 
-    resPrint2$display %>%
+    resPrint$display %>%
       knitr::kable("html", escape = F, col.names = NULL) %>%
       kableExtra::kable_paper(full_width = F)
 
 
   } else {
-    resPrint2 <- resPrint %>%
+    resPrint <- resPrint %>%
       dplyr::mutate(display =
                       paste(pmid,"<br><br>",
                             "&emsp;",title,"<br><br>",
@@ -75,10 +75,12 @@ printAbstract <- function(res){
                             "&emsp;",abstract,"<br><br>",
                             "&emsp;",key_words,"<br><br><br>",sep=""))
 
-    resPrint2$display %>%
+    resPrint$display %>%
       knitr::kable("html", escape = F, col.names = NULL) %>%
       kableExtra::kable_paper(full_width = F)
   }
+
+  return(resPrint$display)
 }
 
 
