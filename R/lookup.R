@@ -99,24 +99,3 @@ fetchPubmed <- function(hits, searchStrategy) {
 
   return(tbl2)
 }
-
-
-
-dates <- rentrez::entrez_summary(
-  db = "pubmed",
-  web_history = hits$web_history, retmode = "xml") %>%
-  rentrez::extract_from_esummary(c("PubDate","EPubDate")) %>%
-  as.data.frame() %>% t() %>% as.data.frame()
-
-dates[dates$EPubDate=="NULL",]$EPubDate <- dates[dates$EPubDate=="NULL",]$PubDate
-
-dates <- dates %>%
-  dplyr::mutate(pmid = rownames(dates)) %>%
-  dplyr::rename(epubdate=.data$EPubDate,) %>%
-  dplyr::select(pmid,epubdate)
-
-tbl <- merge(tbl,dates,by="pmid") %>%
-  dplyr::mutate(epubdate = ifelse(.data$epubdate == "",
-                                  paste(year," Jan 1",sep=""),.data$epubdate))
-
-tbl$epubdate <- lubridate::as_date(as.character(tbl$epubdate))
