@@ -4,7 +4,7 @@
 \alias{printAbstract}
 \title{Function to pretty print Abstracts from a res object}
 \usage{
-printAbstract(res)
+printAbstract(res, plot = TRUE)
 }
 \arguments{
 \item{res}{A fetched sumo object containing PMIDs and key words}
