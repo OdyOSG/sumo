@@ -2,6 +2,7 @@
 
 <!-- badges: start -->
   [![R-CMD-check](https://github.com/OdyOSG/sumo/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/OdyOSG/sumo/actions/workflows/R-CMD-check.yaml)
+ [![Codecov test coverage](https://codecov.io/gh/OdyOSG/sumo/branch/main/graph/badge.svg)](https://app.codecov.io/gh/OdyOSG/sumo?branch=main)
 <!-- badges: end -->
 
 `sumo` is a R package that maps OMOP vocabulary to MeSH enabling a search of pubmed articles based on concept Ids. 

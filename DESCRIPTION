@@ -34,5 +34,6 @@ Suggests:
     DBI,
     readr,
     RPostgres,
-    maps
+    maps,
+    covr
 Config/testthat/edition: 3
