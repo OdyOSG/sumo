@@ -1,10 +1,3 @@
-journals <- journalSearch(highImpactJournals())
-timeFrame <- dateRange("2018/01/01", "2022/12/31")
-terms <- textSearch(text = observationalStudy())
-meshTerm <- meshSearch("anemia")
-searchStrategy <- combineSearchStrategy(terms, timeFrame, journals, meshTerm)
-hits <- searchPubmed(searchStrategy)
-res <- fetchPubmed(hits, searchStrategy)
 
 test_that("abstract print works", {
 
@@ -33,18 +26,19 @@ test_that("Can create cumulative date matrix", {
 
 test_that("Run bib functions", {
 
-  res <- res %>%
-    dplyr::slice(1:4)
+  res2 <- res %>%
+    dplyr::slice(1:2)
 
   #create bibfile
   tmp <- tempfile()
   fs::dir_create(tmp)
   ff <- fs::path(tmp, "tst.bib")
-  exportBib(res, outfile = ff)
+  exportBib(res2, outfile = ff)
 
   tst <- readr::read_file(ff)
   expect_match(tst, "Nelson_2017")
   expect_match(tst, "10.1093/aje/kwx285")
   expect_true(file.exists(ff))
+  unlink(ff)
 
 })
