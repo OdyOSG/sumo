@@ -13,7 +13,7 @@ cdmSchema <- Sys.getenv("CDMSCHEMA")
 
 cdm <- CDMConnector::cdm_from_con(con, cdm_schema = cdmSchema)
 
-
+rentrez::set_entrez_key(Sys.getenv("EUTILS_API_KEY"))
 
 #code block to run prior
 journals <- journalSearch(highImpactJournals())
