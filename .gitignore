@@ -8,3 +8,8 @@ shinySumo_files
 shinySumo.html
 shinySumo.qmd
 sumo/
+res.csv
+Res.bib
+Plots_worldMap.pdf
+Plots_resultsBar.pdf
+Plots_cumuPlot.pdf

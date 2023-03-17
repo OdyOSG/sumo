@@ -76,17 +76,38 @@ plotResultsBar <- function(res, domain, N, conceptDict){
 plotCumulative <- function(res, domain, N, conceptDict){
   eb <- ggplot2::element_blank()
 
-  cumuDate <- cumuDate(res)
+  if(domain == "Journal"){
 
-  cumuDate <- cumuDate %>%
-    dplyr::mutate(Date = rownames(cumuDate))
+    cumuDate <- cumuDate_Journal(res)
 
-  cumuDate <- rbind(cumuDate,cumuDate[length(cumuDate$Date),])
+    cumuDate <- cumuDate %>%
+      dplyr::mutate(Date = rownames(cumuDate))
 
-  cumuDate <- cumuDate %>%
-    tidyr::pivot_longer(cols = colnames(cumuDate)[-length(colnames(cumuDate))])
+    cumuDate <- rbind(cumuDate,cumuDate[length(cumuDate$Date),])
 
-  plotDict <- makePlotDict(conceptDict,domain)
+    cumuDate <- cumuDate %>%
+      tidyr::pivot_longer(cols = colnames(cumuDate)[-length(colnames(cumuDate))])
+
+    plotDict <- as.data.frame(table(res$journal))
+    plotDict <- cbind(plotDict,plotDict[,1])
+    colnames(plotDict) <- c("MeSH_term","count","concepts")
+    plotDict <- plotDict[order(plotDict$count, decreasing = T),]
+
+  } else {
+
+    cumuDate <- cumuDate(res)
+
+    cumuDate <- cumuDate %>%
+      dplyr::mutate(Date = rownames(cumuDate))
+
+    cumuDate <- rbind(cumuDate,cumuDate[length(cumuDate$Date),])
+
+    cumuDate <- cumuDate %>%
+      tidyr::pivot_longer(cols = colnames(cumuDate)[-length(colnames(cumuDate))])
+
+    plotDict <- makePlotDict(conceptDict,domain)
+
+  }
 
   N <- min(N,length(plotDict$concepts))
 
@@ -105,25 +126,26 @@ plotCumulative <- function(res, domain, N, conceptDict){
   }
 
   ggplot2::ggplot(plotDate, ggplot2::aes(x=Date,y=value,group=concepts,colour=concepts)) +
-    ggplot2::geom_line() +
+    ggplot2::geom_line(show.legend = F) +
     ggplot2::scale_color_viridis_d() +
     ggplot2::geom_text(data = plotDate[plotDate$Date == max(plotDate$Date),],
-                        ggplot2::aes(label = concepts), check_overlap = T,
-                        size = 2, nudge_x = 75, nudge_y = 0.325) +
+                       ggplot2::aes(label = concepts), check_overlap = T,
+                       size = 3, nudge_x = 75, nudge_y = 0.325, show.legend = F) +
     ggplot2::scale_x_date(breaks =
-    scales::pretty_breaks(n = length(unique(lubridate::year(plotDate$Date)))+1),
-      limits = c(min(plotDate$Date),
-                 max(plotDate$Date %m+% lubridate::period("6 months")))) +
+                            scales::pretty_breaks(n = length(unique(lubridate::year(plotDate$Date)))+1),
+                          limits = c(min(plotDate$Date),
+                                     max(plotDate$Date %m+% lubridate::period("6 months")))) +
+    ggplot2::geom_point(ggplot2::aes(colour=concepts),shape=15,size=0) +
+    ggplot2::theme(axis.line.x = ggplot2::element_line(color = 'black')) +
+    ggplot2::guides(color=ggplot2::guide_legend(title = NULL, override.aes = ggplot2::aes(size=4))) +
     ggplot2::theme(panel.grid.major = eb, panel.grid.minor = eb,
                    panel.background = eb, panel.border = eb,
-                   axis.title.y = eb,
-                   legend.position = "None") +
-    ggplot2::theme(axis.line.x = ggplot2::element_line(color = 'black')) +
+                   axis.title.y = eb, legend.key = eb, legend.background = eb) +
     ggplot2::xlab("") +
-    ggplot2::ylab("Count")
+    ggplot2::ylab("Count") +
+    ggplot2::coord_cartesian(clip = "off")
 
 }
-
 
 
 #' Plot a map of the country of origin MeSH term

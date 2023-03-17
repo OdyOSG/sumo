@@ -43,7 +43,7 @@ printAbstract <- function(res, plot = TRUE){
 
   resPrint <- res %>%
     dplyr::mutate(
-      pmid = paste("<b>PMID:</b> ", .data$pmid, sep=""),
+      pmid = paste("<font size=\"+1\"><b>PMID:</b> ", .data$pmid,"</font>", sep=""),
       title = paste("<b>", .data$title, "</b>", sep = ""),
       doi = paste("<b>DOI:</b> ", .data$doi, sep = ""),
       key_words = paste("<b>MeSH terms:</b> ", .data$key_words, sep=""),
@@ -78,8 +78,11 @@ printAbstract <- function(res, plot = TRUE){
       knitr::kable("html", escape = F, col.names = NULL) %>%
       kableExtra::kable_paper(full_width = F)
   } else {
-      return(resPrint$display)
+      res <- resPrint$display
   }
+
+  return(res)
+
 }
 
 
@@ -166,6 +169,47 @@ cumuDate <- function(res){
       cumuDate[as.character(resDate[i-1,]$epubdate),]
 
     for(term in unlist(strsplit(resDate[i,]$key_words,";|; "))) {
+      cumuDate[as.character(resDate[i,]$epubdate),term] <-
+        cumuDate[as.character(resDate[i-1,]$epubdate),term] + 1
+    }
+  }
+  return(cumuDate)
+}
+
+#' Creates a cumulative sum matrix with dates as rows and journals as columns
+#' @param res a cdm_reference object created using the CDMConnector package
+#' @return cumuDate A matrix of the cumulative sum of journals by date
+#' @export
+cumuDate_Journal <- function(res){
+
+  resDate <- res[!is.na(res$epubdate),]
+
+  #Setup matrix with correct row/col names and lengths
+  cumuDate <- as.data.frame(matrix(nrow = length(unique(resDate$epubdate)),
+                                   ncol = length(unique(resDate$journal))))
+
+  rownames(cumuDate) <- unique(resDate$epubdate)
+  colnames(cumuDate) <- unique(resDate$journal)
+
+  #Order both matrix and resDate by date
+  cumuDate <- cumuDate[order(rownames(cumuDate)),]
+  resDate <- resDate[order(resDate$epubdate),]
+
+  #Set the first row to 0 occurences
+  cumuDate[as.character(resDate[1,]$epubdate),] <- 0
+
+  #Handle first row by adding one to each key word column where found
+  for(term in resDate[1,]$journal) {
+    cumuDate[as.character(resDate[1,]$epubdate),term] <- 1
+  }
+
+  #Iterate over each term found in each resDateult row, first setting each row to the same
+  #as the previous row, and then adding one to each key word column where found
+  for(i in c(2:length(resDate$epubdate))){
+    cumuDate[as.character(resDate[i,]$epubdate),] <-
+      cumuDate[as.character(resDate[i-1,]$epubdate),]
+
+    for(term in resDate[i,]$journal) {
       cumuDate[as.character(resDate[i,]$epubdate),term] <-
         cumuDate[as.character(resDate[i-1,]$epubdate),term] + 1
     }
