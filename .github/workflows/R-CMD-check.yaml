@@ -30,6 +30,7 @@ jobs:
       CDMPASSWORD: ${{ secrets.CDMPASSWORD }}
       CDMPORT: ${{ secrets.CDMPORT }}
       CDMSCHEMA: ${{ secrets.CDMSCHEMA }}
+      EUTILS_API_KEY: ${{ secrets.EUTILS_API_KEY }}
       R_KEEP_PKG_SOURCE: yes
     steps:
       - uses: actions/checkout@v3
@@ -50,6 +51,7 @@ jobs:
           upload-snapshots: true
 
       - name: Test coverage
+        if: runner.os == 'macOS'
         run: |
           covr::codecov(
             quiet = FALSE,
@@ -59,7 +61,7 @@ jobs:
         shell: Rscript {0}
 
       - name: Show testthat output
-        if: always()
+        if: runner.os == 'macOS'
         run: |
           ## --------------------------------------------------------------------
           find ${{ runner.temp }}/package -name 'testthat.Rout*' -exec cat '{}' \; || true
