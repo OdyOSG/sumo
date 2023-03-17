@@ -1,12 +1,12 @@
-test_that("abstract print works", {
+journals <- journalSearch(highImpactJournals())
+timeFrame <- dateRange("2018/01/01", "2022/12/31")
+terms <- textSearch(text = observationalStudy())
+meshTerm <- meshSearch("anemia")
+searchStrategy <- combineSearchStrategy(terms, timeFrame, journals, meshTerm)
+hits <- searchPubmed(searchStrategy)
+res <- fetchPubmed(hits, searchStrategy)
 
-  journals <- journalSearch(highImpactJournals())
-  timeFrame <- dateRange("2018/01/01", "2022/12/31")
-  terms <- textSearch(text = observationalStudy())
-  meshTerm <- meshSearch("anemia")
-  searchStrategy <- combineSearchStrategy(terms, timeFrame, journals, meshTerm)
-  hits <- searchPubmed(searchStrategy)
-  res <- fetchPubmed(hits, searchStrategy)
+test_that("abstract print works", {
 
   tst <- printAbstract(res, plot = FALSE)
   expect_type(tst[1], "character")
@@ -20,13 +20,6 @@ test_that("abstract print works", {
 
 test_that("Can create cumulative date matrix", {
 
-  journals <- journalSearch(highImpactJournals())
-  timeFrame <- dateRange("2018/01/01", "2022/12/31")
-  terms <- textSearch(text = observationalStudy())
-  meshTerm <- meshSearch("anemia")
-  searchStrategy <- combineSearchStrategy(terms, timeFrame, journals, meshTerm)
-  hits <- searchPubmed(searchStrategy)
-  res <- fetchPubmed(hits, searchStrategy)
   tst <- cumuDate(res)
 
   rr <- as.character(unique(res$epubdate)) %>% sort()
@@ -39,13 +32,8 @@ test_that("Can create cumulative date matrix", {
 
 
 test_that("Run bib functions", {
-  journals <- journalSearch(highImpactJournals())
-  timeFrame <- dateRange("2018/01/01", "2022/12/31")
-  terms <- textSearch(text = observationalStudy())
-  meshTerm <- meshSearch("anemia")
-  searchStrategy <- combineSearchStrategy(terms, timeFrame, journals, meshTerm)
-  hits <- searchPubmed(searchStrategy)
-  res <- fetchPubmed(hits, searchStrategy) %>%
+
+  res <- res %>%
     dplyr::slice(1:4)
 
   #create bibfile
@@ -57,5 +45,6 @@ test_that("Run bib functions", {
   tst <- readr::read_file(ff)
   expect_match(tst, "Nelson_2017")
   expect_match(tst, "10.1093/aje/kwx285")
+  expect_true(file.exists(ff))
 
 })
