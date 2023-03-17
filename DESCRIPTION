@@ -1,11 +1,11 @@
 Package: sumo
 Title: Pubmed extractor based on OMOP vocabulary
-Version: 0.0.1
+Version: 0.0.5
 Authors@R: c(
-    person("Martin", "Lavallee", , "martin.lavallee@odysseusinc.com", role = c("aut", "cre")),
-    person("Laurence", "Lawrence-Archer", , "laurence.lawrence@odysseusinc.com ", role = c("aut"))
+    person("Laurence", "Lawrence-Archer", , "laurence.lawrence@odysseusinc.com", role = c("aut", "cre")),
+    person("Martin", "Lavallee", , "martin.lavallee@odysseusinc.com", role = "aut")
   )
-Description: R package helps search through pubmed based on terms linked to the OMOP vocabulary.
+Description: Helps search through pubmed based on terms linked to the OMOP vocabulary.
 License: Apache License (>= 2)
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
@@ -22,6 +22,8 @@ Imports:
   glue,
   purrr,
   rentrez,
+  fs,
+  readr,
   rlang,
   tibble,
   tidyr,
@@ -30,5 +32,7 @@ Imports:
   ggplot2,
   knitr
 Suggests: 
-    testthat (>= 3.0.0)
+    testthat (>= 3.0.0),
+    DBI,
+    RPostgres
 Config/testthat/edition: 3
