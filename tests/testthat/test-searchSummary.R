@@ -1,11 +1,11 @@
 
 test_that("abstract print works", {
 
-  tst <- printAbstract(res, plot = FALSE)
+  tst <- printAbstract(res, view = FALSE)
   expect_type(tst[1], "character")
   expect_match(tst[1], "29020197")
 
-  tst <- printAbstract(res, plot = TRUE)
+  tst <- printAbstract(res, view = TRUE)
   expect_s3_class(tst, c("kableExtra", "knitr_kable"))
 
 })

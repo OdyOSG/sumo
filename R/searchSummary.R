@@ -38,8 +38,9 @@ makeDict <- function(res, cdm, removeCommon = TRUE){
 
 #' Function to pretty print Abstracts from a res object
 #' @param res A fetched sumo object containing PMIDs and key words
+#' @param view a toggle that specifies whether to view the output in the Rstudio viewer
 #' @export
-printAbstract <- function(res, plot = TRUE){
+printAbstract <- function(res, view = TRUE){
 
   resPrint <- res %>%
     dplyr::mutate(
@@ -55,9 +56,9 @@ printAbstract <- function(res, plot = TRUE){
 
     resPrint <- resPrint %>%
       dplyr::mutate(display =
-                      paste(pmid,"<br><br>",
+                      paste(.data$pmid,"<br><br>",
                             "&emsp;&emsp;",.data$title,"<br><br>",
-                            "&emsp;&emsp;",.data$journal,", ",year,"<br><br>",
+                            "&emsp;&emsp;",.data$journal,", ",.data$year,"<br><br>",
                             "&emsp;&emsp;",.data$doi,"<br><br>",
                             "&emsp;&emsp;",.data$abstract,"<br><br>",
                             "&emsp;&emsp;",.data$key_words,"<br><br>",
@@ -65,15 +66,15 @@ printAbstract <- function(res, plot = TRUE){
   } else {
     resPrint <- resPrint %>%
       dplyr::mutate(display =
-                      paste(pmid,"<br><br>",
+                      paste(.data$pmid,"<br><br>",
                             "&emsp;&emsp;",.data$title,"<br><br>",
-                            "&emsp;&emsp;",.data$journal,", ",year,"<br><br>",
+                            "&emsp;&emsp;",.data$journal,", ",.data$year,"<br><br>",
                             "&emsp;&emsp;",.data$doi,"<br><br>",
                             "&emsp;&emsp;",.data$abstract,"<br><br>",
                             "&emsp;&emsp;",.data$key_words,"<br><br><br>",sep=""))
   }
 
-  if(plot == TRUE){
+  if(view == TRUE){
     res <- resPrint$display %>%
       knitr::kable("html", escape = F, col.names = NULL) %>%
       kableExtra::kable_paper(full_width = F)
@@ -122,8 +123,8 @@ addDictToRes <- function(res, conceptDict){
   res$conceptNames <- unlist(lapply(res$key_words,FUN = conceptName_Map, conceptDict = conceptDict))
 
   res <- res %>%
-    dplyr::relocate(.data$conceptIds, .after = key_words) %>%
-    dplyr::relocate(.data$conceptNames, .after = conceptIds) %>%
+    dplyr::relocate(conceptIds, .after = key_words) %>%
+    dplyr::relocate(conceptNames, .after = conceptIds) %>%
     dplyr::rowwise() %>%
     dplyr::mutate(concepts = paste(unlist(strsplit(.data$conceptNames, ";|; "))," (",
                             unlist(strsplit(.data$conceptIds, ";|; ")),"); ",
