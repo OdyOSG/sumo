@@ -49,7 +49,7 @@ plotResultsBar <- function(res, domain, N, conceptDict){
   N <- min(N,length(plotDict$concepts))
 
   p1 <- ggplot2::ggplot(plotDict[1:N,],
-                        ggplot2::aes(x=count,y=concepts,fill=concepts)) +
+                        ggplot2::aes(x=.data$count,y=.data$concepts,fill=.data$concepts)) +
     ggplot2::geom_bar(stat = "identity") +
     ggplot2::scale_fill_viridis_d() +
     ggplot2::theme(panel.grid.major = eb, panel.grid.minor = eb,
@@ -129,7 +129,7 @@ plotCumulative <- function(res, domain, N, conceptDict){
     ggplot2::geom_line(show.legend = F) +
     ggplot2::scale_color_viridis_d() +
     ggplot2::geom_text(data = plotDate[plotDate$Date == max(plotDate$Date),],
-                       ggplot2::aes(label = concepts), check_overlap = T,
+                       ggplot2::aes(label = .data$concepts), check_overlap = T,
                        size = 3, nudge_x = 75, nudge_y = 0.325, show.legend = F) +
     ggplot2::scale_x_date(breaks =
                             scales::pretty_breaks(n = length(unique(lubridate::year(plotDate$Date)))+1),

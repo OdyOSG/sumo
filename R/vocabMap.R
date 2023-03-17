@@ -34,8 +34,7 @@ mapMeshToConcept <- function(meshTerms, cdm) {
     dplyr::filter(.data$concept_name %in% meshTerms, .data$vocabulary_id == "MeSH") %>%
     dplyr::left_join(cdm$concept_relationship, by = c("concept_id" = "concept_id_2")) %>%
     dplyr::left_join(cdm$concept, by = c("concept_id_1" = "concept_id")) %>%
-    dplyr::select(concept_id_1,concept_name.y,
-                  concept_name.x,domain_id.y) %>%
+    dplyr::select(concept_id_1, concept_name.y, concept_name.x, domain_id.y) %>%
     dplyr::collect() %>%
     dplyr::rename(MeSH_term = concept_name.x) %>%
     dplyr::rename(concept_name = concept_name.y) %>%
