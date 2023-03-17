@@ -75,10 +75,10 @@ fetchPubmed <- function(hits, searchStrategy) {
     rentrez::extract_from_esummary(c("PubDate","EPubDate")) %>%
     as.data.frame() %>%
     tibble::rownames_to_column() %>%
-    tidyr::pivot_longer(-rowname, 'pmid', 'value') %>%
-    tidyr::pivot_wider(id_cols = pmid,
-                       names_from = rowname,
-                       values_from = value) %>%
+    tidyr::pivot_longer(-.data$rowname, 'pmid', 'value') %>%
+    tidyr::pivot_wider(id_cols = .data$pmid,
+                       names_from = .data$rowname,
+                       values_from = .data$value) %>%
     dplyr::mutate(
       EPubDate = dplyr::na_if(EPubDate, "NULL"),
       epubdate = dplyr::coalesce(.data$EPubDate, .data$PubDate)
@@ -92,7 +92,7 @@ fetchPubmed <- function(hits, searchStrategy) {
     dplyr::mutate(
       epubdate = quiet_date(as.character(.data$epubdate))$result,
       epubdate2 = lubridate::ymd(.data$year, truncated = 2L),
-      epubdate = dplyr::coalesce(epubdate, epubdate2)
+      epubdate = dplyr::coalesce(.data$epubdate, .data$epubdate2)
     ) %>%
     dplyr::select(-epubdate2)
 
