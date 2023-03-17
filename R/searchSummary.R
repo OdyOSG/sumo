@@ -77,19 +77,10 @@ printAbstract <- function(res, plot = TRUE){
     res <- resPrint$display %>%
       knitr::kable("html", escape = F, col.names = NULL) %>%
       kableExtra::kable_paper(full_width = F)
-<<<<<<< HEAD
-  } else {
-      res <- resPrint$display
-  }
-
-  return(res)
-
-=======
   } else{
     res <- resPrint$display
   }
   return(res)
->>>>>>> 31b6af11fc12214e4b7783b5766c62bd5cc4e529
 }
 
 
@@ -230,16 +221,22 @@ cumuDate_Journal <- function(res){
 #' @export
 exportBib <- function(res, outfile = "bibs.bib"){
 
+  #add check to create file if it doesnt exist
+  check <- fs::file_exists(outfile)
+  if (!check) {
+    fs::file_create(outfile)
+  }
+
   DOIlist <- res$doi
 
   h <- curl::new_handle()
   curl::handle_setheaders(h, "accept" = "application/x-bibtex")
 
-  urls <- c()
-  for (i in 1:length(DOIlist)) {
-    urls <- c(urls,paste0("https://doi.org/", DOIlist[i]))
-  }
-
+  #replaced with purrr
+  urls <- purrr::map_chr(
+    DOIlist, ~paste0("https://doi.org/", .x)
+  )
+  #getting a weird warning message about unused connections. Not sure what it is
   purrr::walk(urls, ~ {
     curl::curl(., handle = h) %>%
         readLines(warn = FALSE) %>%
@@ -247,3 +244,12 @@ exportBib <- function(res, outfile = "bibs.bib"){
   })
 
 }
+
+
+# curlReadWrite <- function(url, h, outfile) {
+#   con <- curl::curl(url, handle = h)
+#   #on.exit(close(con))
+#   tt <- readr::read_lines(con)
+#   readr::write_lines(tt, file = outfile, append = TRUE)
+#   invisible(tt)
+# }
