@@ -76,10 +76,12 @@ fetchPubmed <- function(hits, searchStrategy) {
     as.data.frame() %>%
     tibble::rownames_to_column() %>%
     tidyr::pivot_longer(-rowname, names_to = 'pmid', values_to = 'value') %>%
-    tidyr::pivot_wider(id_cols = .data$pmid,
-                       names_from = .data$rowname,
-                       values_from = .data$value) %>%
+    tidyr::pivot_wider(id_cols = pmid,
+                       names_from = rowname,
+                       values_from = value) %>%
     dplyr::mutate(
+      EPubDate = as.character(.data$EPubDate),
+      PubDate = as.character(.data$PubDate),
       EPubDate = dplyr::na_if(.data$EPubDate, "NULL"),
       epubdate = dplyr::coalesce(.data$EPubDate, .data$PubDate)
     ) %>%
