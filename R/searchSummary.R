@@ -77,19 +77,13 @@ printAbstract <- function(res, plot = TRUE){
     res <- resPrint$display %>%
       knitr::kable("html", escape = F, col.names = NULL) %>%
       kableExtra::kable_paper(full_width = F)
-<<<<<<< HEAD
+
   } else {
       res <- resPrint$display
   }
 
   return(res)
 
-=======
-  } else{
-    res <- resPrint$display
-  }
-  return(res)
->>>>>>> 31b6af11fc12214e4b7783b5766c62bd5cc4e529
 }
 
 

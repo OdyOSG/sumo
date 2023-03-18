@@ -73,17 +73,14 @@ fetchPubmed <- function(hits, searchStrategy) {
     db = "pubmed",
     web_history = hits$web_history, retmode = "xml") %>%
     rentrez::extract_from_esummary(c("PubDate","EPubDate")) %>%
-    as.data.frame() %>%
-    tibble::rownames_to_column() %>%
-    tidyr::pivot_longer(-rowname, 'pmid', 'value') %>%
-    tidyr::pivot_wider(id_cols = pmid,
-                       names_from = rowname,
-                       values_from = value) %>%
-    dplyr::mutate(
-      EPubDate = dplyr::na_if(EPubDate, "NULL"),
-      epubdate = dplyr::coalesce(.data$EPubDate, .data$PubDate)
-    ) %>%
-    dplyr::select(pmid, epubdate)
+    as.data.frame() %>% t() %>% as.data.frame()
+
+  dates[dates$EPubDate=="NULL",]$EPubDate <- dates[dates$EPubDate=="NULL",]$PubDate
+
+  dates <- dates %>%
+    dplyr::mutate(pmid = rownames(dates)) %>%
+    dplyr::rename(epubdate=.data$EPubDate,) %>%
+    dplyr::select(pmid,epubdate)
 
   quiet_date <- purrr::quietly(lubridate::as_date)
 
