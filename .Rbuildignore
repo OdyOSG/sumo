@@ -2,6 +2,6 @@
 ^\.Rproj\.user$
 ^LICENSE\.md$
 errorReportSql.txt
-scratch/
-bibs/
-bibs.bib
+^scratch$
+^\.github$
+^codecov\.yml$

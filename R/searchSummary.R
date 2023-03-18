@@ -38,8 +38,9 @@ makeDict <- function(res, cdm, removeCommon = TRUE){
 
 #' Function to pretty print Abstracts from a res object
 #' @param res A fetched sumo object containing PMIDs and key words
+#' @param view a toggle that specifies whether to view the output in the Rstudio viewer
 #' @export
-printAbstract <- function(res, plot = TRUE){
+printAbstract <- function(res, view = TRUE){
 
   resPrint <- res %>%
     dplyr::mutate(
@@ -55,9 +56,9 @@ printAbstract <- function(res, plot = TRUE){
 
     resPrint <- resPrint %>%
       dplyr::mutate(display =
-                      paste(pmid,"<br><br>",
+                      paste(.data$pmid,"<br><br>",
                             "&emsp;&emsp;",.data$title,"<br><br>",
-                            "&emsp;&emsp;",.data$journal,", ",year,"<br><br>",
+                            "&emsp;&emsp;",.data$journal,", ",.data$year,"<br><br>",
                             "&emsp;&emsp;",.data$doi,"<br><br>",
                             "&emsp;&emsp;",.data$abstract,"<br><br>",
                             "&emsp;&emsp;",.data$key_words,"<br><br>",
@@ -65,23 +66,22 @@ printAbstract <- function(res, plot = TRUE){
   } else {
     resPrint <- resPrint %>%
       dplyr::mutate(display =
-                      paste(pmid,"<br><br>",
+                      paste(.data$pmid,"<br><br>",
                             "&emsp;&emsp;",.data$title,"<br><br>",
-                            "&emsp;&emsp;",.data$journal,", ",year,"<br><br>",
+                            "&emsp;&emsp;",.data$journal,", ",.data$year,"<br><br>",
                             "&emsp;&emsp;",.data$doi,"<br><br>",
                             "&emsp;&emsp;",.data$abstract,"<br><br>",
                             "&emsp;&emsp;",.data$key_words,"<br><br><br>",sep=""))
   }
 
-  if(plot == TRUE){
+  if(view == TRUE){
     res <- resPrint$display %>%
       knitr::kable("html", escape = F, col.names = NULL) %>%
       kableExtra::kable_paper(full_width = F)
 
-  } else {
-      res <- resPrint$display
+  } else{
+    res <- resPrint$display
   }
-
   return(res)
 
 }
@@ -125,8 +125,8 @@ addDictToRes <- function(res, conceptDict){
   res$conceptNames <- unlist(lapply(res$key_words,FUN = conceptName_Map, conceptDict = conceptDict))
 
   res <- res %>%
-    dplyr::relocate(.data$conceptIds, .after = key_words) %>%
-    dplyr::relocate(.data$conceptNames, .after = conceptIds) %>%
+    dplyr::relocate(conceptIds, .after = key_words) %>%
+    dplyr::relocate(conceptNames, .after = conceptIds) %>%
     dplyr::rowwise() %>%
     dplyr::mutate(concepts = paste(unlist(strsplit(.data$conceptNames, ";|; "))," (",
                             unlist(strsplit(.data$conceptIds, ";|; ")),"); ",
@@ -224,16 +224,22 @@ cumuDate_Journal <- function(res){
 #' @export
 exportBib <- function(res, outfile = "bibs.bib"){
 
+  #add check to create file if it doesnt exist
+  check <- fs::file_exists(outfile)
+  if (!check) {
+    fs::file_create(outfile)
+  }
+
   DOIlist <- res$doi
 
   h <- curl::new_handle()
   curl::handle_setheaders(h, "accept" = "application/x-bibtex")
 
-  urls <- c()
-  for (i in 1:length(DOIlist)) {
-    urls <- c(urls,paste0("https://doi.org/", DOIlist[i]))
-  }
-
+  #replaced with purrr
+  urls <- purrr::map_chr(
+    DOIlist, ~paste0("https://doi.org/", .x)
+  )
+  #getting a weird warning message about unused connections. Not sure what it is
   purrr::walk(urls, ~ {
     curl::curl(., handle = h) %>%
         readLines(warn = FALSE) %>%
@@ -241,3 +247,12 @@ exportBib <- function(res, outfile = "bibs.bib"){
   })
 
 }
+
+
+# curlReadWrite <- function(url, h, outfile) {
+#   con <- curl::curl(url, handle = h)
+#   #on.exit(close(con))
+#   tt <- readr::read_lines(con)
+#   readr::write_lines(tt, file = outfile, append = TRUE)
+#   invisible(tt)
+# }

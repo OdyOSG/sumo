@@ -4,10 +4,12 @@
 \alias{printAbstract}
 \title{Function to pretty print Abstracts from a res object}
 \usage{
-printAbstract(res, plot = TRUE)
+printAbstract(res, view = TRUE)
 }
 \arguments{
 \item{res}{A fetched sumo object containing PMIDs and key words}
+
+\item{view}{a toggle that specifies whether to view the output in the Rstudio viewer}
 }
 \description{
 Function to pretty print Abstracts from a res object

@@ -3,8 +3,8 @@ makePlotDict <- function(conceptDict, domain){
 
     plotDict <- conceptDict  %>%
       dplyr::rowwise() %>%
-      dplyr::mutate(concepts = paste(concept_name,"\n (",
-                                     concept_id_1,")",
+      dplyr::mutate(concepts = paste(.data$concept_name,"\n (",
+                                     .data$concept_id_1,")",
                                      collapse="",sep="")) %>%
       dplyr::filter(.data$domain_id == domain) %>%
       dplyr::arrange(desc(.data$count))
@@ -49,7 +49,7 @@ plotResultsBar <- function(res, domain, N, conceptDict){
   N <- min(N,length(plotDict$concepts))
 
   p1 <- ggplot2::ggplot(plotDict[1:N,],
-                        ggplot2::aes(x=count,y=concepts,fill=concepts)) +
+                        ggplot2::aes(x=.data$count,y=.data$concepts,fill=.data$concepts)) +
     ggplot2::geom_bar(stat = "identity") +
     ggplot2::scale_fill_viridis_d() +
     ggplot2::theme(panel.grid.major = eb, panel.grid.minor = eb,
@@ -113,7 +113,7 @@ plotCumulative <- function(res, domain, N, conceptDict){
 
   plotDate <- cumuDate[cumuDate$name %in% plotDict[1:N,]$MeSH_term,] %>%
     dplyr::left_join(plotDict,by = c("name" = "MeSH_term")) %>%
-    dplyr::mutate(Date = lubridate::as_date(Date))
+    dplyr::mutate(Date = lubridate::as_date(.data$Date))
 
   plotDate_max <- plotDate[plotDate$Date == max(plotDate$Date),]
   plotDate_max$Date <- plotDate_max$Date %m+% lubridate::period("1 month")
@@ -125,17 +125,17 @@ plotCumulative <- function(res, domain, N, conceptDict){
       i*0.3/N
   }
 
-  ggplot2::ggplot(plotDate, ggplot2::aes(x=Date,y=value,group=concepts,colour=concepts)) +
+  ggplot2::ggplot(plotDate, ggplot2::aes(x = .data$Date,y=.data$value,group=.data$concepts,colour=.data$concepts)) +
     ggplot2::geom_line(show.legend = F) +
     ggplot2::scale_color_viridis_d() +
     ggplot2::geom_text(data = plotDate[plotDate$Date == max(plotDate$Date),],
-                       ggplot2::aes(label = concepts), check_overlap = T,
+                       ggplot2::aes(label = .data$concepts), check_overlap = T,
                        size = 3, nudge_x = 75, nudge_y = 0.325, show.legend = F) +
     ggplot2::scale_x_date(breaks =
                             scales::pretty_breaks(n = length(unique(lubridate::year(plotDate$Date)))+1),
                           limits = c(min(plotDate$Date),
                                      max(plotDate$Date %m+% lubridate::period("6 months")))) +
-    ggplot2::geom_point(ggplot2::aes(colour=concepts),shape=15,size=0) +
+    ggplot2::geom_point(ggplot2::aes(colour=.data$concepts),shape=15,size=0) +
     ggplot2::theme(axis.line.x = ggplot2::element_line(color = 'black')) +
     ggplot2::guides(color=ggplot2::guide_legend(title = NULL, override.aes = ggplot2::aes(size=4))) +
     ggplot2::theme(panel.grid.major = eb, panel.grid.minor = eb,
@@ -154,15 +154,15 @@ plotCumulative <- function(res, domain, N, conceptDict){
 plotMap <- function(conceptDict){
   eb <- ggplot2::element_blank()
 
-  plotDict <- na.omit(conceptDict[conceptDict$domain_id == "Country",c(3,5)])
+  plotDict <- stats::na.omit(conceptDict[conceptDict$domain_id == "Country",c(3,5)])
 
   world <- ggplot2::map_data("world") %>%
     dplyr::left_join(plotDict, by = c("region" = "MeSH_term"))
 
   colnames(world)[7] <- "Results"
 
-  ggplot2::ggplot(world, ggplot2::aes(long,lat,fill=Results,group=Results)) +
-    ggplot2::geom_map(map = world, ggplot2::aes(map_id = region)) +
+  ggplot2::ggplot(world, ggplot2::aes(.data$long,.data$lat,fill=.data$Results,group=.data$Results)) +
+    ggplot2::geom_map(map = world, ggplot2::aes(map_id = .data$region)) +
     ggplot2::scale_fill_viridis_c(na.value = "grey80") +
     ggplot2::theme(panel.grid.major = eb, panel.grid.minor = eb,
                    panel.background = eb, panel.border = eb,
