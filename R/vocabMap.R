@@ -59,6 +59,10 @@ addConceptsToDict <- function(resDict, cdm){
 
 }
 
+#' Function that maps condition codes to icd 10 chapters
+#' @param resDict A dictionary of keywords created via makeDict
+#' @param cdm a cdm_reference object created using the CDMConnector package
+#' @export
 icd10Map <- function(resDict, cdm) {
   #add icd10 chapters to connection
   icd10 <-   tibble::tribble(
@@ -119,6 +123,60 @@ icd10Map <- function(resDict, cdm) {
     dplyr::mutate(
       category_id = dplyr::coalesce(category_id, 0L),
       category_name = dplyr::coalesce(category_name, 'Other Condition')
+    ) %>%
+    dplyr::group_by(concept_id) %>%
+    dplyr::mutate(
+      category_id = dplyr::first(category_id, order_by = precedence),
+      category_name = dplyr::first(category_name, order_by = precedence)
+    ) %>%
+    dplyr::ungroup() %>%
+    dplyr::select(concept_id, concept_name, category_id, category_name) %>%
+    dplyr::distinct() %>%
+    dplyr::collect()
+
+  newResDict <- resDict %>%
+    dplyr::left_join(qq %>% select(-concept_name), by = c("concept_id_1"= "concept_id"))
+
+  return(newResDict)
+}
+
+
+#' Function that maps drug codes to atc2 class
+#' @param resDict A dictionary of keywords created via makeDict
+#' @param cdm a cdm_reference object created using the CDMConnector package
+#' @export
+atc2Map <- function(resDict, cdm) {
+
+  #get atc2 vocab
+  atc2 <- cdm$concept %>%
+    dplyr::filter(
+      vocabulary_id == 'ATC',
+      concept_class_id == 'ATC 2nd'
+      ) %>%
+    mutate(
+      precedence = dplyr::row_number(concept_code),
+      category_id = concept_id,
+      category_name = concept_name
+    ) %>%
+    dplyr::select(precedence, category_id, category_name)
+
+  # concept ids to use
+  conceptIds <- resDict %>%
+    dplyr::filter(domain_id == "Drug") %>%
+    dplyr::pull(concept_id_1)
+
+  #make a temp table on the concept ancestor table
+  tmp <- cdm$concept_ancestor %>%
+    dplyr::inner_join(atc2, by = c("ancestor_concept_id" = "category_id")) %>%
+    dplyr::select(ancestor_concept_id, descendant_concept_id, category_name, precedence) %>%
+    dplyr::rename(category_id = ancestor_concept_id)
+
+  qq <- cdm$concept %>%
+    dplyr::filter(concept_id %in% conceptIds) %>%
+    dplyr::left_join(tmp, by = c("concept_id" = "descendant_concept_id")) %>%
+    dplyr::mutate(
+      category_id = dplyr::coalesce(category_id, 0L),
+      category_name = dplyr::coalesce(category_name, 'Other Drug')
     ) %>%
     dplyr::group_by(concept_id) %>%
     dplyr::mutate(
