@@ -80,7 +80,7 @@ printAbstract <- function(res, view = TRUE){
       kableExtra::kable_paper(full_width = F)
 
   } else{
-    res <- resPrint$display
+    res <- resPrint
   }
   return(res)
 
