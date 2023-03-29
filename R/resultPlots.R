@@ -125,16 +125,19 @@ plotCumulative <- function(res, domain, N, conceptDict){
       i*0.3/N
   }
 
+  #nudgeVal_Y <- max(plotDate$value)/25
+  #nudgeVal_X <- (max(as.numeric(plotDate$Date))-min(as.numeric(plotDate$Date)))/5
+
   ggplot2::ggplot(plotDate, ggplot2::aes(x = .data$Date,y=.data$value,group=.data$concepts,colour=.data$concepts)) +
     ggplot2::geom_line(show.legend = F) +
     ggplot2::scale_color_viridis_d() +
-    ggplot2::geom_text(data = plotDate[plotDate$Date == max(plotDate$Date),],
-                       ggplot2::aes(label = .data$concepts), check_overlap = T,
-                       size = 3, nudge_x = 75, nudge_y = 0.325, show.legend = F) +
+    #ggplot2::geom_text(data = plotDate[plotDate$Date == max(plotDate$Date),],
+    #                   ggplot2::aes(label = .data$concepts), check_overlap = T,
+    #                   size = 3, nudge_x = nudgeVal_X, nudge_y = nudgeVal_Y, show.legend = F) +
     ggplot2::scale_x_date(breaks =
                             scales::pretty_breaks(n = length(unique(lubridate::year(plotDate$Date)))+1),
-                          limits = c(min(plotDate$Date),
-                                     max(plotDate$Date %m+% lubridate::period("6 months")))) +
+                            limits = c(min(plotDate$Date),
+                                       max(plotDate$Date))) +
     ggplot2::geom_point(ggplot2::aes(colour=.data$concepts),shape=15,size=0) +
     ggplot2::theme(axis.line.x = ggplot2::element_line(color = 'black')) +
     ggplot2::guides(color=ggplot2::guide_legend(title = NULL, override.aes = ggplot2::aes(size=4))) +
@@ -146,7 +149,6 @@ plotCumulative <- function(res, domain, N, conceptDict){
     ggplot2::coord_cartesian(clip = "off")
 
 }
-
 
 #' Plot a map of the country of origin MeSH term
 #' @param conceptDict A dictionary of keywords created via makeDict with

@@ -4,7 +4,7 @@
 #' @param cdm a cdm_reference object created using the CDMConnector package
 #' @param removeCommon A toggle on whether or not to remove the most common keywords
 #' @export
-makeDict <- function(res, cdm, removeCommon = TRUE){
+makeDict <- function(res, cdm, removeCommon = TRUE, rollup = FALSE){
   dict <- as.data.frame(table(unlist(strsplit(res$key_words, "; "))))
   colnames(dict) <- c("MeSH_term","count")
   dict <- dict[!dict$MeSH_term %in% commonKeywords(),]
@@ -33,6 +33,11 @@ makeDict <- function(res, cdm, removeCommon = TRUE){
                 resDict$MeSH_term,ignore.case = T) &
                 is.na(resDict$domain_id),]$domain_id <- "Country"
 
+  if(rollup == TRUE){
+    resDict <- icd10Map(resDict = resDict, cdm = cdm)
+    resDict <- atc2Map(resDict = resDict, cdm = cdm)
+  }
+
   return(resDict)
 }
 
@@ -44,8 +49,8 @@ printAbstract <- function(res, view = TRUE){
 
   resPrint <- res %>%
     dplyr::mutate(
-      pmid = paste("<font size=\"+1\"><b>PMID:</b> ", .data$pmid,"</font>", sep=""),
-      title = paste("<b>", .data$title, "</b>", sep = ""),
+      pmid = paste("PMID: ", .data$pmid, sep=""),
+      title = paste(.data$title, sep = ""),
       doi = paste("<b>DOI:</b> ", .data$doi, sep = ""),
       key_words = paste("<b>MeSH terms:</b> ", .data$key_words, sep=""),
       abstract = gsub("<br><br>","<br><br>&emsp;",.data$abstract))
@@ -56,8 +61,7 @@ printAbstract <- function(res, view = TRUE){
 
     resPrint <- resPrint %>%
       dplyr::mutate(display =
-                      paste(.data$pmid,"<br><br>",
-                            "&emsp;&emsp;",.data$title,"<br><br>",
+                      paste("&emsp;&emsp;",.data$title,"<br><br>",
                             "&emsp;&emsp;",.data$journal,", ",.data$year,"<br><br>",
                             "&emsp;&emsp;",.data$doi,"<br><br>",
                             "&emsp;&emsp;",.data$abstract,"<br><br>",
@@ -66,8 +70,7 @@ printAbstract <- function(res, view = TRUE){
   } else {
     resPrint <- resPrint %>%
       dplyr::mutate(display =
-                      paste(.data$pmid,"<br><br>",
-                            "&emsp;&emsp;",.data$title,"<br><br>",
+                      paste("&emsp;&emsp;",.data$title,"<br><br>",
                             "&emsp;&emsp;",.data$journal,", ",.data$year,"<br><br>",
                             "&emsp;&emsp;",.data$doi,"<br><br>",
                             "&emsp;&emsp;",.data$abstract,"<br><br>",
@@ -79,7 +82,7 @@ printAbstract <- function(res, view = TRUE){
       knitr::kable("html", escape = F, col.names = NULL) %>%
       kableExtra::kable_paper(full_width = F)
   } else{
-    res <- resPrint$display
+    res <- resPrint
   }
   return(res)
 }
