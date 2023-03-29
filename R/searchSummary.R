@@ -31,7 +31,7 @@ makeDict <- function(res, cdm, removeCommon = TRUE){
 
   resDict[grepl(paste(unique(world_coordinates$region),collapse="|"),
                 resDict$MeSH_term,ignore.case = T) &
-                is.na(resDict$domain_id),]$domain_id <- "Country"
+            is.na(resDict$domain_id),]$domain_id <- "Country"
 
   return(resDict)
 }
@@ -44,34 +44,15 @@ printAbstract <- function(res, view = TRUE){
 
   resPrint <- res %>%
     dplyr::mutate(
-      pmid = paste("<font size=\"+1\"><b>PMID:</b> ", .data$pmid,"</font>", sep=""),
-      title = paste("<b>", .data$title, "</b>", sep = ""),
+      pmid = paste("PMID: ", .data$pmid, sep=""),
       doi = paste("<b>DOI:</b> ", .data$doi, sep = ""),
-      key_words = paste("<b>MeSH terms:</b> ", .data$key_words, sep=""),
-      abstract = gsub("<br><br>","<br><br>&emsp;",.data$abstract))
+      key_words = paste("<b>MeSH terms:</b> ", .data$key_words, sep=""))
 
   if("concepts" %in% colnames(res)){
     resPrint <- resPrint %>%
       dplyr::mutate(concepts = paste("<b>OMOP Concepts (IDs):</b> ", .data$concepts))
 
-    resPrint <- resPrint %>%
-      dplyr::mutate(display =
-                      paste(.data$pmid,"<br><br>",
-                            "&emsp;&emsp;",.data$title,"<br><br>",
-                            "&emsp;&emsp;",.data$journal,", ",.data$year,"<br><br>",
-                            "&emsp;&emsp;",.data$doi,"<br><br>",
-                            "&emsp;&emsp;",.data$abstract,"<br><br>",
-                            "&emsp;&emsp;",.data$key_words,"<br><br>",
-                            "&emsp;&emsp;",.data$concepts,"<br><br><br>",sep=""))
-  } else {
-    resPrint <- resPrint %>%
-      dplyr::mutate(display =
-                      paste(.data$pmid,"<br><br>",
-                            "&emsp;&emsp;",.data$title,"<br><br>",
-                            "&emsp;&emsp;",.data$journal,", ",.data$year,"<br><br>",
-                            "&emsp;&emsp;",.data$doi,"<br><br>",
-                            "&emsp;&emsp;",.data$abstract,"<br><br>",
-                            "&emsp;&emsp;",.data$key_words,"<br><br><br>",sep=""))
+
   }
 
   if(view == TRUE){
@@ -92,7 +73,7 @@ conceptID_Map <- function(keywords, conceptDict) {
 
   conceptIds <- conceptDict[conceptDict$MeSH_term %in%
                               c(strsplit(keywords,";|; ")[[1]]) &
-                          !is.na(conceptDict$concept_id_1),]$concept_id_1
+                              !is.na(conceptDict$concept_id_1),]$concept_id_1
 
   conceptIds <- paste(unlist(conceptIds),collapse = "; ")
 
@@ -105,8 +86,8 @@ conceptID_Map <- function(keywords, conceptDict) {
 conceptName_Map <- function(keywords, conceptDict) {
 
   conceptNames <- conceptDict[conceptDict$MeSH_term %in%
-                              c(strsplit(keywords,";|; ")[[1]]) &
-                              !is.na(conceptDict$concept_id_1),]$concept_name
+                                c(strsplit(keywords,";|; ")[[1]]) &
+                                !is.na(conceptDict$concept_id_1),]$concept_name
 
   conceptNames <- paste(unlist(conceptNames),collapse = "; ")
 
@@ -129,8 +110,8 @@ addDictToRes <- function(res, conceptDict){
     dplyr::relocate(conceptNames, .after = conceptIds) %>%
     dplyr::rowwise() %>%
     dplyr::mutate(concepts = paste(unlist(strsplit(.data$conceptNames, ";|; "))," (",
-                            unlist(strsplit(.data$conceptIds, ";|; ")),"); ",
-                            collapse="",sep=""))
+                                   unlist(strsplit(.data$conceptIds, ";|; ")),"); ",
+                                   collapse="",sep=""))
 
   return(res)
 
@@ -242,8 +223,8 @@ exportBib <- function(res, outfile = "bibs.bib"){
   #getting a weird warning message about unused connections. Not sure what it is
   purrr::walk(urls, ~ {
     curl::curl(., handle = h) %>%
-        readLines(warn = FALSE) %>%
-        write(file = outfile, append = TRUE)
+      readLines(warn = FALSE) %>%
+      write(file = outfile, append = TRUE)
   })
 
 }
