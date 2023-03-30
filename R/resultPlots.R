@@ -151,7 +151,7 @@ plotCumulative <- function(res, domain, N, conceptDict){
 }
 
 #' Plot a map of the country of origin MeSH term
-#' @param conceptDict A dictionary of keywords created via makeDict with
+#' @param conceptDict A dictionary of keywords created via makeDict
 #' @export
 plotMap <- function(conceptDict){
   eb <- ggplot2::element_blank()
@@ -171,4 +171,41 @@ plotMap <- function(conceptDict){
                    axis.title = eb, axis.text = eb, axis.ticks = eb,
                    axis.line = eb,
                    legend.position = "right")
+}
+
+#' Plot a bar chart of rollup terms
+#' @param conceptDict A dictionary of keywords created via makeDict
+#' @export
+plotRollUp <- function(conceptDict){
+  eb <- ggplot2::element_blank()
+
+  suppressMessages(
+
+  plotDict <- conceptDict %>%
+    filter(!is.na(rollup_name)) %>%
+    group_by(rollup_name, domain_id) %>%
+    summarise(across(.cols = "count", list(sum)))
+
+  )
+
+  plotDict <- plotDict[order(plotDict$count_1, decreasing = T),]
+  plotDict$rollup_name <- factor(plotDict$rollup_name, levels = rev(plotDict$rollup_name))
+
+  N <- min(N,length(plotDict$rollup_name))
+
+  p1 <- ggplot2::ggplot(plotDict[1:N,],
+                        ggplot2::aes(x=.data$count_1,y=.data$rollup_name,fill=.data$rollup_name)) +
+    ggplot2::geom_bar(stat = "identity") +
+    ggplot2::scale_fill_viridis_d() +
+    ggplot2::theme(panel.grid.major = eb, panel.grid.minor = eb,
+                   panel.background = eb, panel.border = eb,
+                   axis.title.y = eb,
+                   legend.position = "None") +
+    ggplot2::theme(axis.line.x = ggplot2::element_line(color = 'black')) +
+    ggplot2::xlab("Count") +
+    ggplot2::scale_x_continuous(breaks = scales::pretty_breaks())
+
+  p1
+
+  return(p1)
 }

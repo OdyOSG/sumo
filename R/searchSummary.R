@@ -36,6 +36,12 @@ makeDict <- function(res, cdm, removeCommon = TRUE, rollup = FALSE){
   if(rollup == TRUE){
     resDict <- icd10Map(resDict = resDict, cdm = cdm)
     resDict <- atc2Map(resDict = resDict, cdm = cdm)
+
+    resDict[is.na(resDict$category_id.x),]$category_id.x <- resDict[is.na(resDict$category_id.x),]$category_id.y
+    resDict[is.na(resDict$category_name.x),]$category_name.x <- resDict[is.na(resDict$category_name.x),]$category_name.y
+    resDict <- resDict[,-c(8,9)]
+    colnames(resDict)[c(6,7)] <- c("rollup_id","rollup_name")
+
   }
 
   return(resDict)
