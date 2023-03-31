@@ -68,7 +68,7 @@ printAbstract <- function(res, view = TRUE){
       dplyr::mutate(display =
                       paste("&emsp;&emsp;<b>",.data$title,"</b>","<br><br>",
                             "&emsp;&emsp;",.data$journal,", ",.data$year,"<br><br>",
-                            "&emsp;&emsp;",'<b><a href="https://doi.org/',testDOI,'">',"DOI: ",testDOI,"</a></b>","<br><br>",
+                            "&emsp;&emsp;",'<b><a href="https://doi.org/',.data$doi,'"target="_blank">',"DOI: ",.data$doi,"</a></b>","<br><br>",
                             "&emsp;&emsp;",.data$abstract,"<br><br>",
                             "&emsp;&emsp;",.data$key_words,"<br><br>",
                             "&emsp;&emsp;",.data$concepts,"<br><br><br>",sep=""))
@@ -77,7 +77,7 @@ printAbstract <- function(res, view = TRUE){
       dplyr::mutate(display =
                       paste("&emsp;&emsp;<b>",.data$title,"</b>","<br><br>",
                             "&emsp;&emsp;",.data$journal,", ",.data$year,"<br><br>",
-                            "&emsp;&emsp;",'<b><a href="https://doi.org/',testDOI,'">',"DOI: ",testDOI,"</a></b>","<br><br>",
+                            "&emsp;&emsp;",'<b><a href="https://doi.org/',.data$doi,'"target="_blank">',"DOI: ",.data$doi,"</a></b>","<br><br>",
                             "&emsp;&emsp;",.data$abstract,"<br><br>",
                             "&emsp;&emsp;",.data$key_words,"<br><br><br>",sep=""))
   }

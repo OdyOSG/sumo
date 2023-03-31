@@ -54,7 +54,7 @@ plotResultsBar <- function(res, domain, N, conceptDict){
     ggplot2::scale_fill_viridis_d() +
     ggplot2::theme(panel.grid.major = eb, panel.grid.minor = eb,
                    panel.background = eb, panel.border = eb,
-                   axis.title.y = eb,
+                   axis.title.y = eb, axis.text.y = ggplot2::element_text(size=10),
                    legend.position = "None") +
     ggplot2::theme(axis.line.x = ggplot2::element_line(color = 'black')) +
     ggplot2::xlab("Count") +
@@ -143,7 +143,8 @@ plotCumulative <- function(res, domain, N, conceptDict){
     ggplot2::guides(color=ggplot2::guide_legend(title = NULL, override.aes = ggplot2::aes(size=4))) +
     ggplot2::theme(panel.grid.major = eb, panel.grid.minor = eb,
                    panel.background = eb, panel.border = eb,
-                   axis.title.y = eb, legend.key = eb, legend.background = eb) +
+                   axis.title.y = eb, legend.key = eb, legend.background = eb,
+                   legend.text = ggplot2::element_text(size = 12)) +
     ggplot2::xlab("") +
     ggplot2::ylab("Count") +
     ggplot2::coord_cartesian(clip = "off")
@@ -176,7 +177,7 @@ plotMap <- function(conceptDict){
 #' Plot a bar chart of rollup terms
 #' @param conceptDict A dictionary of keywords created via makeDict
 #' @export
-plotRollUp <- function(conceptDict){
+plotRollUp <- function(conceptDict, N){
   eb <- ggplot2::element_blank()
 
   suppressMessages(
@@ -199,7 +200,7 @@ plotRollUp <- function(conceptDict){
     ggplot2::scale_fill_viridis_d() +
     ggplot2::theme(panel.grid.major = eb, panel.grid.minor = eb,
                    panel.background = eb, panel.border = eb,
-                   axis.title.y = eb,
+                   axis.title.y = eb, axis.text.y = ggplot2::element_text(size=10),
                    legend.position = "None") +
     ggplot2::theme(axis.line.x = ggplot2::element_line(color = 'black')) +
     ggplot2::xlab("Count") +
