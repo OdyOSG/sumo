@@ -57,7 +57,6 @@ printAbstract <- function(res, view = TRUE){
     dplyr::mutate(
       pmid = paste("PMID: ", .data$pmid, sep=""),
       title = paste(.data$title, sep = ""),
-      doi = paste("<b>DOI:</b> ", .data$doi, sep = ""),
       key_words = paste("<b>MeSH terms:</b> ", .data$key_words, sep=""),
       abstract = gsub("<br><br>","<br><br>&emsp;",.data$abstract))
 
@@ -67,18 +66,18 @@ printAbstract <- function(res, view = TRUE){
 
     resPrint <- resPrint %>%
       dplyr::mutate(display =
-                      paste("&emsp;&emsp;",.data$title,"<br><br>",
+                      paste("&emsp;&emsp;<b>",.data$title,"</b>","<br><br>",
                             "&emsp;&emsp;",.data$journal,", ",.data$year,"<br><br>",
-                            "&emsp;&emsp;",.data$doi,"<br><br>",
+                            "&emsp;&emsp;",'<b><a href="https://doi.org/',testDOI,'">',"DOI: ",testDOI,"</a></b>","<br><br>",
                             "&emsp;&emsp;",.data$abstract,"<br><br>",
                             "&emsp;&emsp;",.data$key_words,"<br><br>",
                             "&emsp;&emsp;",.data$concepts,"<br><br><br>",sep=""))
   } else {
     resPrint <- resPrint %>%
       dplyr::mutate(display =
-                      paste("&emsp;&emsp;",.data$title,"<br><br>",
+                      paste("&emsp;&emsp;<b>",.data$title,"</b>","<br><br>",
                             "&emsp;&emsp;",.data$journal,", ",.data$year,"<br><br>",
-                            "&emsp;&emsp;",.data$doi,"<br><br>",
+                            "&emsp;&emsp;",'<b><a href="https://doi.org/',testDOI,'">',"DOI: ",testDOI,"</a></b>","<br><br>",
                             "&emsp;&emsp;",.data$abstract,"<br><br>",
                             "&emsp;&emsp;",.data$key_words,"<br><br><br>",sep=""))
   }
