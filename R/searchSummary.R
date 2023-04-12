@@ -44,6 +44,9 @@ makeDict <- function(res, cdm, removeCommon = TRUE, rollup = FALSE){
 
   }
 
+  resDict[resDict$MeSH_term=="United Kingdom",]$domain_id <- "Country"
+  resDict[resDict$MeSH_term=="United Kingdom",]$MeSH_term <- "UK"
+
   return(resDict)
 }
 
