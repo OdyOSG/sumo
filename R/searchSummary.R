@@ -31,7 +31,7 @@ makeDict <- function(res, cdm, removeCommon = TRUE, rollup = FALSE){
 
   resDict[grepl(paste(unique(world_coordinates$region),collapse="|"),
                 resDict$MeSH_term,ignore.case = T) &
-                is.na(resDict$domain_id),]$domain_id <- "Country"
+            is.na(resDict$domain_id),]$domain_id <- "Country"
 
   if(rollup == TRUE){
     resDict <- icd10Map(resDict = resDict, cdm = cdm)
@@ -60,36 +60,25 @@ printAbstract <- function(res, view = TRUE){
       key_words = paste("<b>MeSH terms:</b> ", .data$key_words, sep=""),
       abstract = gsub("<br><br>","<br><br>&emsp;",.data$abstract))
 
+      doi = paste("<b>DOI:</b> ", .data$doi, sep = ""),
+      key_words = paste("<b>MeSH terms:</b> ", .data$key_words, sep=""))
+
   if("concepts" %in% colnames(res)){
     resPrint <- resPrint %>%
       dplyr::mutate(concepts = paste("<b>OMOP Concepts (IDs):</b> ", .data$concepts))
 
-    resPrint <- resPrint %>%
-      dplyr::mutate(display =
-                      paste("&emsp;&emsp;<b>",.data$title,"</b>","<br><br>",
-                            "&emsp;&emsp;",.data$journal,", ",.data$year,"<br><br>",
-                            "&emsp;&emsp;",'<b><a href="https://doi.org/',.data$doi,'"target="_blank">',"DOI: ",.data$doi,"</a></b>","<br><br>",
-                            "&emsp;&emsp;",.data$abstract,"<br><br>",
-                            "&emsp;&emsp;",.data$key_words,"<br><br>",
-                            "&emsp;&emsp;",.data$concepts,"<br><br><br>",sep=""))
-  } else {
-    resPrint <- resPrint %>%
-      dplyr::mutate(display =
-                      paste("&emsp;&emsp;<b>",.data$title,"</b>","<br><br>",
-                            "&emsp;&emsp;",.data$journal,", ",.data$year,"<br><br>",
-                            "&emsp;&emsp;",'<b><a href="https://doi.org/',.data$doi,'"target="_blank">',"DOI: ",.data$doi,"</a></b>","<br><br>",
-                            "&emsp;&emsp;",.data$abstract,"<br><br>",
-                            "&emsp;&emsp;",.data$key_words,"<br><br><br>",sep=""))
   }
 
   if(view == TRUE){
     res <- resPrint$display %>%
       knitr::kable("html", escape = F, col.names = NULL) %>%
       kableExtra::kable_paper(full_width = F)
+
   } else{
     res <- resPrint
   }
   return(res)
+
 }
 
 
@@ -98,7 +87,7 @@ conceptID_Map <- function(keywords, conceptDict) {
 
   conceptIds <- conceptDict[conceptDict$MeSH_term %in%
                               c(strsplit(keywords,";|; ")[[1]]) &
-                          !is.na(conceptDict$concept_id_1),]$concept_id_1
+                              !is.na(conceptDict$concept_id_1),]$concept_id_1
 
   conceptIds <- paste(unlist(conceptIds),collapse = "; ")
 
@@ -111,8 +100,8 @@ conceptID_Map <- function(keywords, conceptDict) {
 conceptName_Map <- function(keywords, conceptDict) {
 
   conceptNames <- conceptDict[conceptDict$MeSH_term %in%
-                              c(strsplit(keywords,";|; ")[[1]]) &
-                              !is.na(conceptDict$concept_id_1),]$concept_name
+                                c(strsplit(keywords,";|; ")[[1]]) &
+                                !is.na(conceptDict$concept_id_1),]$concept_name
 
   conceptNames <- paste(unlist(conceptNames),collapse = "; ")
 
@@ -135,8 +124,8 @@ addDictToRes <- function(res, conceptDict){
     dplyr::relocate(conceptNames, .after = conceptIds) %>%
     dplyr::rowwise() %>%
     dplyr::mutate(concepts = paste(unlist(strsplit(.data$conceptNames, ";|; "))," (",
-                            unlist(strsplit(.data$conceptIds, ";|; ")),"); ",
-                            collapse="",sep=""))
+                                   unlist(strsplit(.data$conceptIds, ";|; ")),"); ",
+                                   collapse="",sep=""))
 
   return(res)
 
@@ -248,8 +237,8 @@ exportBib <- function(res, outfile = "bibs.bib"){
   #getting a weird warning message about unused connections. Not sure what it is
   purrr::walk(urls, ~ {
     curl::curl(., handle = h) %>%
-        readLines(warn = FALSE) %>%
-        write(file = outfile, append = TRUE)
+      readLines(warn = FALSE) %>%
+      write(file = outfile, append = TRUE)
   })
 
 }

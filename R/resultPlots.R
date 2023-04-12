@@ -139,7 +139,8 @@ plotCumulative <- function(res, domain, N, conceptDict){
                             limits = c(min(plotDate$Date),
                                        max(plotDate$Date))) +
     ggplot2::geom_point(ggplot2::aes(colour=.data$concepts),shape=15,size=0) +
-    ggplot2::theme(axis.line.x = ggplot2::element_line(color = 'black')) +
+    ggplot2::theme(axis.line.x = ggplot2::element_line(color = 'black'),
+                   axis.line.y = ggplot2::element_line(color = "black")) +
     ggplot2::guides(color=ggplot2::guide_legend(title = NULL, override.aes = ggplot2::aes(size=4))) +
     ggplot2::theme(panel.grid.major = eb, panel.grid.minor = eb,
                    panel.background = eb, panel.border = eb,
