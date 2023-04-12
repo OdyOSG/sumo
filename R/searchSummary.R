@@ -4,7 +4,7 @@
 #' @param cdm a cdm_reference object created using the CDMConnector package
 #' @param removeCommon A toggle on whether or not to remove the most common keywords
 #' @export
-makeDict <- function(res, cdm, removeCommon = TRUE){
+makeDict <- function(res, cdm, removeCommon = TRUE, rollup = FALSE){
   dict <- as.data.frame(table(unlist(strsplit(res$key_words, "; "))))
   colnames(dict) <- c("MeSH_term","count")
   dict <- dict[!dict$MeSH_term %in% commonKeywords(),]
@@ -33,6 +33,17 @@ makeDict <- function(res, cdm, removeCommon = TRUE){
                 resDict$MeSH_term,ignore.case = T) &
             is.na(resDict$domain_id),]$domain_id <- "Country"
 
+  if(rollup == TRUE){
+    resDict <- icd10Map(resDict = resDict, cdm = cdm)
+    resDict <- atc2Map(resDict = resDict, cdm = cdm)
+
+    resDict[is.na(resDict$category_id.x),]$category_id.x <- resDict[is.na(resDict$category_id.x),]$category_id.y
+    resDict[is.na(resDict$category_name.x),]$category_name.x <- resDict[is.na(resDict$category_name.x),]$category_name.y
+    resDict <- resDict[,-c(8,9)]
+    colnames(resDict)[c(6,7)] <- c("rollup_id","rollup_name")
+
+  }
+
   return(resDict)
 }
 
@@ -45,13 +56,16 @@ printAbstract <- function(res, view = TRUE){
   resPrint <- res %>%
     dplyr::mutate(
       pmid = paste("PMID: ", .data$pmid, sep=""),
+      title = paste(.data$title, sep = ""),
+      key_words = paste("<b>MeSH terms:</b> ", .data$key_words, sep=""),
+      abstract = gsub("<br><br>","<br><br>&emsp;",.data$abstract))
+
       doi = paste("<b>DOI:</b> ", .data$doi, sep = ""),
       key_words = paste("<b>MeSH terms:</b> ", .data$key_words, sep=""))
 
   if("concepts" %in% colnames(res)){
     resPrint <- resPrint %>%
       dplyr::mutate(concepts = paste("<b>OMOP Concepts (IDs):</b> ", .data$concepts))
-
 
   }
 

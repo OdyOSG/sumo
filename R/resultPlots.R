@@ -54,7 +54,7 @@ plotResultsBar <- function(res, domain, N, conceptDict){
     ggplot2::scale_fill_viridis_d() +
     ggplot2::theme(panel.grid.major = eb, panel.grid.minor = eb,
                    panel.background = eb, panel.border = eb,
-                   axis.title.y = eb,
+                   axis.title.y = eb, axis.text.y = ggplot2::element_text(size=10),
                    legend.position = "None") +
     ggplot2::theme(axis.line.x = ggplot2::element_line(color = 'black')) +
     ggplot2::xlab("Count") +
@@ -125,32 +125,35 @@ plotCumulative <- function(res, domain, N, conceptDict){
       i*0.3/N
   }
 
+  #nudgeVal_Y <- max(plotDate$value)/25
+  #nudgeVal_X <- (max(as.numeric(plotDate$Date))-min(as.numeric(plotDate$Date)))/5
+
   ggplot2::ggplot(plotDate, ggplot2::aes(x = .data$Date,y=.data$value,group=.data$concepts,colour=.data$concepts)) +
     ggplot2::geom_line(show.legend = F) +
     ggplot2::scale_color_viridis_d() +
-    ggplot2::geom_text(data = plotDate[plotDate$Date == max(plotDate$Date),],
-                       ggplot2::aes(label = .data$concepts), check_overlap = T,
-                       size = 3, nudge_x = 75, nudge_y = 0.325, show.legend = F) +
+    #ggplot2::geom_text(data = plotDate[plotDate$Date == max(plotDate$Date),],
+    #                   ggplot2::aes(label = .data$concepts), check_overlap = T,
+    #                   size = 3, nudge_x = nudgeVal_X, nudge_y = nudgeVal_Y, show.legend = F) +
     ggplot2::scale_x_date(breaks =
                             scales::pretty_breaks(n = length(unique(lubridate::year(plotDate$Date)))+1),
-                          limits = c(min(plotDate$Date),
-                                     max(plotDate$Date %m+% lubridate::period("6 months")))) +
+                            limits = c(min(plotDate$Date),
+                                       max(plotDate$Date))) +
     ggplot2::geom_point(ggplot2::aes(colour=.data$concepts),shape=15,size=0) +
     ggplot2::theme(axis.line.x = ggplot2::element_line(color = 'black'),
                    axis.line.y = ggplot2::element_line(color = "black")) +
     ggplot2::guides(color=ggplot2::guide_legend(title = NULL, override.aes = ggplot2::aes(size=4))) +
     ggplot2::theme(panel.grid.major = eb, panel.grid.minor = eb,
                    panel.background = eb, panel.border = eb,
-                   axis.title.y = eb, legend.key = eb, legend.background = eb) +
+                   axis.title.y = eb, legend.key = eb, legend.background = eb,
+                   legend.text = ggplot2::element_text(size = 12)) +
     ggplot2::xlab("") +
     ggplot2::ylab("Count") +
     ggplot2::coord_cartesian(clip = "off")
 
 }
 
-
 #' Plot a map of the country of origin MeSH term
-#' @param conceptDict A dictionary of keywords created via makeDict with
+#' @param conceptDict A dictionary of keywords created via makeDict
 #' @export
 plotMap <- function(conceptDict){
   eb <- ggplot2::element_blank()
@@ -170,4 +173,41 @@ plotMap <- function(conceptDict){
                    axis.title = eb, axis.text = eb, axis.ticks = eb,
                    axis.line = eb,
                    legend.position = "right")
+}
+
+#' Plot a bar chart of rollup terms
+#' @param conceptDict A dictionary of keywords created via makeDict
+#' @export
+plotRollUp <- function(conceptDict, N){
+  eb <- ggplot2::element_blank()
+
+  suppressMessages(
+
+  plotDict <- conceptDict %>%
+    filter(!is.na(rollup_name)) %>%
+    group_by(rollup_name, domain_id) %>%
+    summarise(across(.cols = "count", list(sum)))
+
+  )
+
+  plotDict <- plotDict[order(plotDict$count_1, decreasing = T),]
+  plotDict$rollup_name <- factor(plotDict$rollup_name, levels = rev(plotDict$rollup_name))
+
+  N <- min(N,length(plotDict$rollup_name))
+
+  p1 <- ggplot2::ggplot(plotDict[1:N,],
+                        ggplot2::aes(x=.data$count_1,y=.data$rollup_name,fill=.data$rollup_name)) +
+    ggplot2::geom_bar(stat = "identity") +
+    ggplot2::scale_fill_viridis_d() +
+    ggplot2::theme(panel.grid.major = eb, panel.grid.minor = eb,
+                   panel.background = eb, panel.border = eb,
+                   axis.title.y = eb, axis.text.y = ggplot2::element_text(size=10),
+                   legend.position = "None") +
+    ggplot2::theme(axis.line.x = ggplot2::element_line(color = 'black')) +
+    ggplot2::xlab("Count") +
+    ggplot2::scale_x_continuous(breaks = scales::pretty_breaks())
+
+  p1
+
+  return(p1)
 }

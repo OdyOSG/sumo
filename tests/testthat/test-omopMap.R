@@ -24,3 +24,16 @@ test_that("add dictionary back to res", {
   expect_type(res$concepts, "character")
 })
 
+test_that("icd10 map works", {
+  resDict <- makeDict(res, cdm)
+  icd10_map <- icd10Map(resDict, cdm)
+  expect_type(icd10_map$category_id, "integer")
+  expect_type(icd10_map$category_name, "character")
+})
+
+test_that("atc2 map works", {
+  resDict <- makeDict(res, cdm)
+  atc2_map <- atc2Map(resDict, cdm)
+  expect_type(atc2_map$category_id, "integer")
+  expect_type(atc2_map$category_name, "character")
+})
