@@ -4,12 +4,14 @@
 \alias{plotOverlap}
 \title{Plot a bar chart of condition/drug overlap}
 \usage{
-plotOverlap(res, conceptDict)
+plotOverlap(res, conceptDict, N)
 }
 \arguments{
 \item{res}{A dictionary of keywords created via makeDict}
 
 \item{conceptDict}{A dictionary of keywords created via makeDict}
+
+\item{N}{Function will plot the N highest scoring (by count) terms}
 }
 \description{
 Plot a bar chart of condition/drug overlap

@@ -214,8 +214,9 @@ plotRollUp <- function(conceptDict, N){
 #' Plot a bar chart of condition/drug overlap
 #' @param res A dictionary of keywords created via makeDict
 #' @param conceptDict A dictionary of keywords created via makeDict
+#' @param N Function will plot the N highest scoring (by count) terms
 #' @export
-plotOverlap <- function(res, conceptDict){
+plotOverlap <- function(res, conceptDict, N){
   res_reduced <- res[,c(1,8)]
   res_reduced <- res_reduced[!res_reduced$conceptIds=="",]
 
