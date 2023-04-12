@@ -44,7 +44,7 @@ plotResultsBar <- function(res, domain, N, conceptDict){
 
   }
 
-  plotDict$concepts <- factor(plotDict$concepts, levels = rev(plotDict$concepts))
+  plotDict$concepts <- factor(plotDict$concepts, levels = rev(unique(plotDict$concepts)))
 
   N <- min(N,length(plotDict$concepts))
 
@@ -139,8 +139,7 @@ plotCumulative <- function(res, domain, N, conceptDict){
                             limits = c(min(plotDate$Date),
                                        max(plotDate$Date))) +
     ggplot2::geom_point(ggplot2::aes(colour=.data$concepts),shape=15,size=0) +
-    ggplot2::theme(axis.line.x = ggplot2::element_line(color = 'black'),
-                   axis.line.y = ggplot2::element_line(color = "black")) +
+    ggplot2::theme(axis.line.x = ggplot2::element_line(color = 'black')) +
     ggplot2::guides(color=ggplot2::guide_legend(title = NULL, override.aes = ggplot2::aes(size=4))) +
     ggplot2::theme(panel.grid.major = eb, panel.grid.minor = eb,
                    panel.background = eb, panel.border = eb,
@@ -210,4 +209,63 @@ plotRollUp <- function(conceptDict, N){
   p1
 
   return(p1)
+}
+
+#' Plot a bar chart of condition/drug overlap
+#' @param res A dictionary of keywords created via makeDict
+#' @param conceptDict A dictionary of keywords created via makeDict
+#' @export
+plotOverlap <- function(res, conceptDict){
+  res_reduced <- res[,c(1,8)]
+  res_reduced <- res_reduced[!res_reduced$conceptIds=="",]
+
+  res_reduced <- res_reduced %>%
+    dplyr::mutate(conceptIds = strsplit(as.character(conceptIds), ";")) %>%
+    tidyr::unnest(conceptIds) %>%
+    dplyr::mutate(conceptIds = as.numeric(conceptIds))
+
+  res_reduced <- res_reduced %>%
+    dplyr::left_join(conceptDict[,c(1,3,4)], by = c("conceptIds"="concept_id_1")) %>%
+    dplyr::filter(domain_id %in% c("Condition","Drug"))
+
+  overlapIds <- c()
+  overlapNames <- c()
+
+  for(pmid in unique(res_reduced$pmid)){
+
+    res_temp <- res_reduced[res_reduced$pmid == pmid,]
+
+    if("Condition" %in% res_temp$domain_id){
+      if("Drug" %in% res_temp$domain_id){
+        res_c <- res_temp[res_temp$domain_id=="Condition",]
+        res_d <- res_temp[res_temp$domain_id=="Drug",]
+        for(conceptC in unique(res_c$conceptIds)){
+          for(conceptD in unique(res_d$conceptIds)) {
+            overlapId = paste(conceptC,":",conceptD,sep="")
+            overlapIds <- c(overlapIds,overlapId)
+
+            overlapName = paste(res_temp[res_temp$conceptIds==conceptC,]$MeSH_term,":",
+                                res_temp[res_temp$conceptIds==conceptD,]$MeSH_term,sep="")
+            overlapNames <- c(overlapNames,overlapName)
+          }
+        }
+      }
+    }
+  }
+
+  resIds <- as.data.frame(table(overlapIds)[order(table(overlapIds), decreasing = T)])
+  resNames <- as.data.frame(table(overlapNames)[order(table(overlapNames), decreasing = T)])
+
+  N <- 10
+
+  resNames[1:min(N,dim(resNames)[1]),] %>%
+    ggplot2::ggplot(ggplot2::aes(x=overlapNames,y=Freq, fill = overlapNames)) +
+    ggplot2::geom_bar(stat="identity") +
+    ggplot2::scale_fill_viridis_d() +
+    ggplot2::theme(panel.background = eb,
+                   axis.title = eb, axis.text.y = ggplot2::element_text(size=10),
+                   legend.position = "None",
+                   axis.text.x = ggplot2::element_text(angle = 75, vjust = 1,hjust=1)) +
+    ggplot2::ggtitle("Overlap of Conditions:Drugs")
+
 }
