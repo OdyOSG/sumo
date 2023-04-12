@@ -266,7 +266,7 @@ plotOverlap <- function(res, conceptDict, N){
     ggplot2::theme(panel.background = eb,
                    axis.title = eb, axis.text.y = ggplot2::element_text(size=10),
                    legend.position = "None",
-                   axis.text.x = ggplot2::element_text(angle = 75, vjust = 1,hjust=1)) +
+                   axis.text.x = ggplot2::element_text(angle = 75, vjust = 1,hjust=1, size = 10)) +
     ggplot2::ggtitle("Overlap of Conditions:Drugs")
 
 }
