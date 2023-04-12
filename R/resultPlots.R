@@ -217,6 +217,8 @@ plotRollUp <- function(conceptDict, N){
 #' @param N Function will plot the N highest scoring (by count) terms
 #' @export
 plotOverlap <- function(res, conceptDict, N){
+  eb <- ggplot2::element_blank()
+
   res_reduced <- res[,c(1,8)]
   res_reduced <- res_reduced[!res_reduced$conceptIds=="",]
 
