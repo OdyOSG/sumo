@@ -5,7 +5,7 @@
 \title{Function to build a dictionary of all the MeSH terms in a result
 Prototype function used before MeSH mapping is complete}
 \usage{
-makeDict(res, cdm, removeCommon = TRUE)
+makeDict(res, cdm, removeCommon = TRUE, rollup = FALSE)
 }
 \arguments{
 \item{res}{A fetched sumo object containing PMIDs and key words}

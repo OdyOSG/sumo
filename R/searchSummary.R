@@ -58,8 +58,7 @@ printAbstract <- function(res, view = TRUE){
       pmid = paste("PMID: ", .data$pmid, sep=""),
       title = paste(.data$title, sep = ""),
       key_words = paste("<b>MeSH terms:</b> ", .data$key_words, sep=""),
-      abstract = gsub("<br><br>","<br><br>&emsp;",.data$abstract))
-
+      abstract = gsub("<br><br>","<br><br>&emsp;",.data$abstract),
       doi = paste("<b>DOI:</b> ", .data$doi, sep = ""),
       key_words = paste("<b>MeSH terms:</b> ", .data$key_words, sep=""))
 
