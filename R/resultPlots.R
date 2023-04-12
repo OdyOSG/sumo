@@ -44,7 +44,7 @@ plotResultsBar <- function(res, domain, N, conceptDict){
 
   }
 
-  plotDict$concepts <- factor(plotDict$concepts, levels = rev(plotDict$concepts))
+  plotDict$concepts <- factor(plotDict$concepts, levels = rev(unique(plotDict$concepts)))
 
   N <- min(N,length(plotDict$concepts))
 
