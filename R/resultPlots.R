@@ -122,15 +122,14 @@ plotCumulative <- function(res, domain, N, conceptDict, cumuDate){
       i*0.3/N
   }
 
-  #nudgeVal_Y <- max(plotDate$value)/25
-  #nudgeVal_X <- (max(as.numeric(plotDate$Date))-min(as.numeric(plotDate$Date)))/5
+  plotDate_max <- plotDate_max %>%
+    arrange(desc(value))
+
+  plotDate$concepts <- factor(plotDate$concepts, levels = unique(plotDate_max$concepts))
 
   ggplot2::ggplot(plotDate, ggplot2::aes(x = .data$Date,y=.data$value,group=.data$concepts,colour=.data$concepts)) +
     ggplot2::geom_line(show.legend = F) +
     ggplot2::scale_color_viridis_d() +
-    #ggplot2::geom_text(data = plotDate[plotDate$Date == max(plotDate$Date),],
-    #                   ggplot2::aes(label = .data$concepts), check_overlap = T,
-    #                   size = 3, nudge_x = nudgeVal_X, nudge_y = nudgeVal_Y, show.legend = F) +
     ggplot2::scale_x_date(breaks =
                             scales::pretty_breaks(n = length(unique(lubridate::year(plotDate$Date)))+1),
                             limits = c(min(plotDate$Date),
@@ -322,6 +321,13 @@ plotCumulativeRollup <- function(res, N = 10, conceptDict, cumuDate) {
 
   plotDate.f <- plotDate.f %>%
     aggregate(value~Date+rollup_name,sum)
+
+  plotDate_max <- plotDate.f[plotDate.f$Date == max(plotDate.f$Date),]
+
+  plotDate_max <- plotDate_max %>%
+    dplyr::arrange(desc(value))
+
+  plotDate.f$rollup_name <- factor(plotDate.f$rollup_name, levels = unique(plotDate_max$rollup_name))
 
   ggplot2::ggplot(plotDate.f, ggplot2::aes(x = .data$Date,y=.data$value,group=.data$rollup_name,colour=.data$rollup_name)) +
     ggplot2::geom_line(show.legend = F) +
