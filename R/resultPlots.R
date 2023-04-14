@@ -278,7 +278,7 @@ plotOverlap <- function(res, conceptDict, N){
 #' @param cumuDate A cumudate object
 #' @export
 plotCumulativeRollup <- function(res, N = 10, conceptDict, cumuDate) {
-  conceptDict <- resDict
+
   N <- 20
 
   eb <- ggplot2::element_blank()
