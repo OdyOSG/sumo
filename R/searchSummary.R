@@ -4,7 +4,7 @@
 #' @param cdm a cdm_reference object created using the CDMConnector package
 #' @param removeCommon A toggle on whether or not to remove the most common keywords
 #' @export
-makeDict <- function(res, cdm, removeCommon = TRUE, rollup = FALSE){
+makeDict <- function(res, cdm, removeCommon = TRUE, rollup = TRUE){
   dict <- as.data.frame(table(unlist(strsplit(res$key_words, "; "))))
   colnames(dict) <- c("MeSH_term","count")
   dict <- dict[!dict$MeSH_term %in% commonKeywords(),]

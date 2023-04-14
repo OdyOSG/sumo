@@ -71,14 +71,13 @@ plotResultsBar <- function(res, domain, N, conceptDict){
 #' attached OMOP concept name and ID information
 #' @param domain The specific OMOP domain to be plotted
 #' @param N Function will plot the N highest scoring (by count) terms
+#' @param cumuDate Function will plot the N highest scoring (by count) terms
 #' @param res a cdm_reference object created using the CDMConnector package
 #' @export
-plotCumulative <- function(res, domain, N, conceptDict){
+plotCumulative <- function(res, domain, N, conceptDict, cumuDate){
   eb <- ggplot2::element_blank()
 
   if(domain == "Journal"){
-
-    cumuDate <- cumuDate_Journal(res)
 
     cumuDate <- cumuDate %>%
       dplyr::mutate(Date = rownames(cumuDate))
@@ -94,8 +93,6 @@ plotCumulative <- function(res, domain, N, conceptDict){
     plotDict <- plotDict[order(plotDict$count, decreasing = T),]
 
   } else {
-
-    cumuDate <- cumuDate(res)
 
     cumuDate <- cumuDate %>%
       dplyr::mutate(Date = rownames(cumuDate))
@@ -177,7 +174,7 @@ plotMap <- function(conceptDict){
 #' Plot a bar chart of rollup terms
 #' @param conceptDict A dictionary of keywords created via makeDict
 #' @export
-plotRollUp <- function(conceptDict, N){
+plotRollUp <- function(conceptDict, N=10){
   eb <- ggplot2::element_blank()
 
   suppressMessages(
@@ -271,4 +268,76 @@ plotOverlap <- function(res, conceptDict, N){
                    axis.text.x = ggplot2::element_text(angle = 75, vjust = 1,hjust=1, size = 10)) +
     ggplot2::ggtitle("Overlap of Conditions:Drugs")
 
+}
+
+
+#' Plot specific OMOP results for a given results object and domain
+#' @param conceptDict A dictionary of keywords created via makeDict with
+#' attached OMOP concept name and ID information
+#' @param N Function will plot the N highest scoring (by count) terms
+#' @param res a cdm_reference object created using the CDMConnector package
+#' @param cumuDate A cumudate object
+#' @export
+plotCumulativeRollup <- function(res, N = 10, conceptDict, cumuDate) {
+  conceptDict <- resDict
+  N <- 20
+
+  eb <- ggplot2::element_blank()
+
+  cumuDate <- cumuDate %>%
+    dplyr::mutate(Date = rownames(cumuDate))
+
+  cumuDate <- rbind(cumuDate,cumuDate[length(cumuDate$Date),])
+
+  cumuDate <- cumuDate %>%
+    tidyr::pivot_longer(cols = colnames(cumuDate)[-length(colnames(cumuDate))])
+
+  cumuDate <- cumuDate[!duplicated(paste(cumuDate$Date,cumuDate$name,cumuDate$value)),]
+
+  plotDict <- conceptDict  %>%
+    dplyr::rowwise() %>%
+    dplyr::mutate(concepts = paste(.data$rollup_name,"\n (",
+                                   .data$rollup_id,")",
+                                   collapse="",sep="")) %>%
+    dplyr::arrange(desc(.data$count)) %>%
+    dplyr::select(rollup_name,MeSH_term)
+
+  plotDict <- plotDict[!is.na(plotDict$rollup_name),]
+
+  plotDate <- cumuDate %>%
+    dplyr::inner_join(plotDict,by = c("name" = "MeSH_term")) %>%
+    dplyr::mutate(Date = lubridate::as_date(.data$Date))
+
+  plotDate_max <- plotDate[plotDate$Date == max(plotDate$Date),]
+  plotDate_max$Date <- plotDate_max$Date %m+% lubridate::period("1 month")
+  plotDate <- rbind(plotDate,plotDate_max)
+
+  plotDate_max <- plotDate_max %>%
+    dplyr::arrange(desc(value))
+
+  N <- min(N,length(unique(plotDate_max$rollup_name)))
+  toPlot <- plotDate_max$rollup_name[1:N]
+
+  plotDate.f <- plotDate[plotDate$rollup_name %in% toPlot,]
+
+  plotDate.f <- plotDate.f %>%
+    aggregate(value~Date+rollup_name,sum)
+
+  ggplot2::ggplot(plotDate.f, ggplot2::aes(x = .data$Date,y=.data$value,group=.data$rollup_name,colour=.data$rollup_name)) +
+    ggplot2::geom_line(show.legend = F) +
+    ggplot2::scale_color_viridis_d() +
+    ggplot2::scale_x_date(breaks =
+                            scales::pretty_breaks(n = length(unique(lubridate::year(plotDate$Date)))+1),
+                          limits = c(min(plotDate$Date),
+                                     max(plotDate$Date))) +
+    ggplot2::geom_point(ggplot2::aes(colour=.data$rollup_name),shape=15,size=0) +
+    ggplot2::theme(axis.line.x = ggplot2::element_line(color = 'black')) +
+    ggplot2::guides(color=ggplot2::guide_legend(title = NULL, override.aes = ggplot2::aes(size=4))) +
+    ggplot2::theme(panel.grid.major = eb, panel.grid.minor = eb,
+                   panel.background = eb, panel.border = eb,
+                   axis.title.y = eb, legend.key = eb, legend.background = eb,
+                   legend.text = ggplot2::element_text(size = 12)) +
+    ggplot2::xlab("") +
+    ggplot2::ylab("Count") +
+    ggplot2::coord_cartesian(clip = "off")
 }

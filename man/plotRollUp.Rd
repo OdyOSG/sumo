@@ -4,7 +4,7 @@
 \alias{plotRollUp}
 \title{Plot a bar chart of rollup terms}
 \usage{
-plotRollUp(conceptDict, N)
+plotRollUp(conceptDict, N = 10)
 }
 \arguments{
 \item{conceptDict}{A dictionary of keywords created via makeDict}
