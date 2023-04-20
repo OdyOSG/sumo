@@ -234,11 +234,13 @@ exportBib <- function(res, outfile = "bibs.bib"){
     DOIlist, ~paste0("https://doi.org/", .x)
   )
   #getting a weird warning message about unused connections. Not sure what it is
-  purrr::walk(urls, ~ {
+  res <- purrr::walk(urls, ~ {
     curl::curl(., handle = h) %>%
       readLines(warn = FALSE) %>%
       write(file = outfile, append = TRUE)
   })
+
+  return(res)
 
 }
 

@@ -9,7 +9,7 @@ searchPubmed <- function(searchStrategy) {
     db = "pubmed",
     term = searchStrategy,
     use_history = TRUE,
-    retmax = 10000
+    retmax = 1000000
   )
   return(hits)
 }
@@ -61,7 +61,7 @@ fetchPubmed <- function(hits, searchStrategy) {
   denom <- rentrez::entrez_search(
     db = "pubmed",
     term = removeKeywords(searchStrategy),
-    retmax = 10000
+    retmax = 1000000
   )$count
 
   #tbl$abstract <- paste(tbl$abstract, "\n", sep="")
