@@ -65,18 +65,46 @@ printAbstract <- function(res, view = TRUE){
   if("concepts" %in% colnames(res)){
     resPrint <- resPrint %>%
       dplyr::mutate(concepts = paste("<b>OMOP Concepts (IDs):</b> ", .data$concepts))
+    if(view == TRUE){
+      res <- resPrint %>%
+        mutate(details = paste(doi,"<br><br>",abstract,"<br><br>",key_words,"<br><br>",concepts))
 
+      r1 <- reactable(res[,c(1,2,3)],
+                      rownames = FALSE, pagination = FALSE,
+                      striped = TRUE, highlight = TRUE,
+                      theme = reactableTheme(
+                        borderColor = "#dfe2e5",
+                        stripedColor = "#f6f8fa",
+                        highlightColor = "#f0f5f9",
+                        cellPadding = "4px 0px",
+                        style = list(fontFamily = "-apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif"),
+                        searchInputStyle = list(width = "100%")
+                      ),
+
+                      defaultColDef = colDef(name=""),
+                      columns = list(
+                        pmid = colDef(width = 150, vAlign = "center"),
+                        title = colDef(width = 700, vAlign = "center"),
+                        journal = colDef(width = 450, vAlign = "center")
+                      ),
+                      details = function(index) {
+                        abs_data <- res[res$pmid == res$pmid[index], ]
+                        htmltools::div(style = "padding: 1rem",
+                                       reactable(abs_data[,c(14)], outlined = F,
+                                                 defaultColDef = colDef(name="", html = TRUE))
+                        )
+                      })
+
+      return(r1)
+
+    } else{
+      return(resPrint)
+    }
+
+  } else {
+    print("Concepts not found in Res object. Try running makeDict() and addDictToRes() or disabling the view toggle.")
+    return(res)
   }
-
-  if(view == TRUE){
-    res <- resPrint$display %>%
-      knitr::kable("html", escape = F, col.names = NULL) %>%
-      kableExtra::kable_paper(full_width = F)
-
-  } else{
-    res <- resPrint
-  }
-  return(res)
 
 }
 

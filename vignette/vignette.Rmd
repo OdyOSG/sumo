@@ -1,0 +1,178 @@
+---
+title: "SUMO R package - general use"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{SUMO R package - general use}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+# Set up
+
+First, let's set up the packages that will allow us to access the PubMed API and the OMOP CDM. If you haven't already, you can use install.packages("") for the following packages to install these into your R package directory.    
+
+```{r}
+library(sumo)
+library(rentrez)
+library(CDMConnector)
+library(DBI)
+library(reactable)
+```
+
+### Setting up our CDM connection
+
+Before we get started with running SUMO, we'll need to connect to a CDM utilizing the package CDMConnector. In this vignette we'll be using a SynPuf 110k datasource, but any valid database with an attached OMOP vocabulary will do.
+
+We will use the keyring package to retrieve our personal access data, but you will need to supply your own valid credentials for your CDM.
+
+```{r}
+con <- DBI::dbConnect(
+  RPostgres::Postgres(),
+  host     = keyring::key_get("host"),
+  dbname   = "synpuf_110k",
+  user     = keyring::key_get("user"),
+  password = keyring::key_get("password"),
+  port     = keyring::key_get("port")
+)
+
+cdmSchema = keyring::key_get("cdmSchema")
+
+cdm <- cdm_from_con(con, cdm_schema = cdmSchema)
+
+```
+
+
+This CDMConnecter object is how we'll connect to the OMOP vocabulary for our MeSH mapping going forward, as tt provides us with a direct connection to the concept vocabularies.
+
+### Optional: Inputting PubMed API Key
+
+The PubMed API that rentrez relies on has an inbuilt query limit of 3 requests per second. This is quite generous, but if you wish, by logging onto PubMed, you can utilise your own API key to increase this more than threefold to 10 queries per second. We can do this as follows:
+
+```{r}
+set_entrez_key(keyring::key_get("PubMed_API"))
+
+```
+
+## Creating a search strategy
+
+The first step in utilizing the SUMO package is to create a search strategy that will be sent to the PubMed servers. SUMO comes pre-built with a few helpful functions that will assist you in creating a set of useful terms and combining these together.
+
+We can see these individual steps as follows:
+
+Firstly, we may wish to limit our query to a set of high impact journals. This string can be generated as follows, or manually input by the user as a string.
+
+```{r}
+journals <- journalSearch(highImpactJournals())
+journals
+
+```
+
+Secondly, we may want to limit our query to a particular timeframe:
+
+```{r}
+timeFrame <- dateRange("2013/01/01", "2023/01/01")
+timeFrame
+
+```
+
+Next, we may wish to add terms that will limit our results to observational studies that utilize the methods we are interested in to specifically generate real world evidence:
+
+```{r}
+terms <- textSearch(text = observationalStudy())
+terms
+
+```
+
+Finally, we wish to input our concept code as a mapping term to complete out search. It is also possible to skip any of these steps and submit a blank query, but do note that this is likely to exceed the maximum number of possible results (~10,000).
+
+In this case, we wish to use the concept code "439777", which refers to anemia.
+
+```{r}
+conceptIds <- c("439777")
+keyword <- searchOmop(conceptIds = conceptIds, cdm = cdm, explosion = TRUE)
+
+keyword
+
+```
+
+Here we have supplied two additional arguments. We must first specify the CDM which we have constructed earlier. Secondly, we specify that we wish to perform MeSH explosion on our anemia term, which will allow PubMed to return terms it deems similar to anemia. More information on MeSH explosion may be found here:
+
+https://www.nlm.nih.gov/pubs/techbull/mj98/mj98_truncation.html
+
+Finally, we can view our lengthy search query which will be submitted to PubMed:
+
+```{r}
+searchStrategy <- combineSearchStrategy(terms, timeFrame, journals, keyword)
+searchStrategy
+
+```
+
+## Running a search
+
+Now that we have constructed our query, running a search is achieved by calling the following functions:
+
+```{r}
+hits <- searchPubmed(searchStrategy)
+
+res <- fetchPubmed(hits, searchStrategy)
+
+res
+```
+
+We see that our res object does not yet have any back mapping to the OMOP CDM, which can be achieved by creating a dictionary of OMOP concept codes found within the results object:
+
+```{r}
+resDict <- makeDict(res, cdm, rollup = TRUE)
+
+res <- addDictToRes(res, resDict)
+
+res
+```
+
+Now that we have added our back mapping of OMOP concepts to our results, we have a complete dataframe of relevant publications and the terms they contain.
+
+
+## Search Summary and visualization
+
+We may now view the summarized abstracts returned by our search query in a reactable table format:
+
+```{r}
+tab <- printAbstract(res, view = T)
+
+tab
+```
+
+And further, we may plot a few summary graphs of these returned results. We must first pick a domain that we are interested in viewing. To start with, we may choose to look at the conditions contained within our results. We choose N such that we limit our plot to the top 15 most frequent results.
+
+More information on which domains are available and what information they contain can be found here:
+
+https://www.ohdsi.org/web/wiki/doku.php?id=documentation:vocabulary:domains
+
+
+```{r, fig.width=8, fig.height=12, fig.align='center'}
+plotResultsBar(res, domain = "Condition", N = 15, conceptDict = resDict)
+```
+
+We may also wish to view a cumulative track of terms as they change over time. For convenience, we store a cumulative date object in the environment rather than recreate it for each plot:
+
+```{r, fig.width=8, fig.height=12, fig.align='center'}
+
+cumuDate <- cumuDate(res)
+
+plotCumulative(res, domain = "Condition", N = 15, conceptDict = resDict, cumuDate)
+
+```
+
+Finally, we may wish to view how these individual terms "roll up" in the OMOP hierarchy to ATC1 or ATC2 categories:
+
+```{r, fig.width=8, fig.height=12, fig.align='center'}
+plotRollUp(resDict, 15)
+```
+

@@ -140,7 +140,8 @@ plotCumulative <- function(res, domain, N, conceptDict, cumuDate){
     ggplot2::theme(panel.grid.major = eb, panel.grid.minor = eb,
                    panel.background = eb, panel.border = eb,
                    axis.title.y = eb, legend.key = eb, legend.background = eb,
-                   legend.text = ggplot2::element_text(size = 12)) +
+                   legend.text = ggplot2::element_text(size = 12),
+                   legend.position = "bottom") +
     ggplot2::xlab("") +
     ggplot2::ylab("Count") +
     ggplot2::coord_cartesian(clip = "off")
